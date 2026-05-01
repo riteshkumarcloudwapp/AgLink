@@ -1,0 +1,129 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "My Express API",
+        "description": "A sample API built with Express",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000"
+        }
+    ],
+    "security": [],
+    "paths": {
+
+     "/user/register": {
+      "post": {
+      "summary": "Register User",
+      "description": "Registers a new user with email and phone number. Sends OTP to email after successful registration.",
+      "tags": ["AUTH"],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "first_name",
+                "last_name",
+                "email",
+                "country_code",
+                "phone_number",
+                "password"
+              ],
+              "properties": {
+                "first_name": {
+                  "type": "string",
+                  "example": "Ritesh"
+                },
+                "last_name": {
+                  "type": "string",
+                  "example": "Kumar"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "example": "ritesh@gmail.com"
+                },
+                "country_code": {
+                  "type": "string",
+                  "example": "+91"
+                },
+                "phone_number": {
+                  "type": "string",
+                  "example": "9876543210"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "123456"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "User Registered Successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "User Registered Successfully"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Invalid input data"
+              }
+            }
+          }
+        },
+        "409": {
+          "description": "User Already Exists",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "User already Registered"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+         }
+     }
+
+
+    },
+
+
+
+    "components": {
+    "securitySchemes": {
+        "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}
