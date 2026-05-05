@@ -13,50 +13,478 @@
     "security": [],
     "paths": {
 
-     "/user/register": {
-      "post": {
-      "summary": "Register User",
-      "description": "Registers a new user with email and phone number. Sends OTP to email after successful registration.",
-      "tags": ["AUTH"],
+    "/user/register": {
+    "post": {
+    "summary": "Register User",
+    "description": "Registers a new user with email and phone number. Sends OTP to email after successful registration.",
+    "tags": ["USER AUTH"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": [
+              "first_name",
+              "last_name",
+              "email",
+              "country_code",
+              "phone_number",
+              "password"
+            ],
+            "properties": {
+              "first_name": {
+                "type": "string",
+                "example": "Ritesh"
+              },
+              "last_name": {
+                "type": "string",
+                "example": "Kumar"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "ritesh@gmail.com"
+              },
+              "country_code": {
+                "type": "string",
+                "example": "+91"
+              },
+              "phone_number": {
+                "type": "string",
+                "example": "9876543210"
+              },
+              "password": {
+                "type": "string",
+                "example": "123456"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OTP sent to registered email",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Otp sent to Registered Email",
+              "data": {
+                "id": "uuid",
+                "first_name": "Ritesh",
+                "last_name": "Kumar",
+                "email": "ritesh@gmail.com",
+                "country_code": "+91",
+                "phone_number": "9876543210",
+                "otp": "123456",
+                "expiry_time": "2026-05-01T10:00:00Z"
+              }
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "User already exists or validation error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Email or Phone_number already Registered"
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+    "/user/verify-otp": {
+    "post": {
+    "summary": "Verify OTP",
+    "description": "Verifies user using OTP and user ID. Marks user as verified if OTP is valid.",
+    "tags": ["USER AUTH"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["otp", "id"],
+            "properties": {
+              "otp": {
+                "type": "string",
+                "example": "123456"
+              },
+              "id": {
+                "type": "string",
+                "example": "uuid"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OTP Verified Successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Verified successfully"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Invalid OTP",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid Otp"
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "OTP Expired",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Otp Expired"
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+    "/user/login": {
+    "post": {
+    "summary": "Login User",
+    "description": "Logs in user using email and password. If user is not verified, OTP will be sent to email.",
+    "tags": ["USER AUTH"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["email", "password"],
+            "properties": {
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "ritesh@gmail.com"
+              },
+              "password": {
+                "type": "string",
+                "example": "123456"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Login Successful",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Login Successful",
+              "Jwt_token": "your_jwt_token_here"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "User not found or incorrect password",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "user not found"
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "Incorrect Password",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Incorrect Password"
+            }
+          }
+        }
+      },
+      "403": {
+        "description": "User not verified - OTP sent",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Otp Send Successfully. Please verify your email before logging in."
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+    "/user/forget-password": {
+    "post": {
+    "summary": "Forget Password",
+    "description": "Sends OTP to user's registered email for password reset.",
+    "tags": ["USER AUTH"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["email"],
+            "properties": {
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "ritesh@gmail.com"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OTP sent successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Otp send Successful"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "User not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "User not found"
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/user/reset-password": {
+     "post": {
+    "summary": "Reset Password",
+    "description": "Resets user password using user ID.",
+    "tags": ["USER AUTH"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["password", "id"],
+            "properties": {
+              "password": {
+                "type": "string",
+                "example": "123456"
+              },
+              "id": {
+                "type": "string",
+                "example": "uuid"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Password reset successful",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Password reset successful"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "User not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "User not found"
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+    "/user/resend-otp": {
+    "post": {
+    "summary": "Resend OTP",
+    "description": "Resends OTP to user's email with rate limiting (60 seconds).",
+    "tags": ["USER AUTH"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "uuid"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OTP resent successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Resend Otp Send"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "User not found or rate limit exceeded",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "User not found"
+            }
+          }
+        }
+      },
+      "429": {
+        "description": "Too many requests (rate limit)",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Please wait 25 seconds before resending."
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     
+     "/home/add-category": {
+     "post": {
+      "summary": "Add Category",
+      "description": "Create a new category with name and icon image",
+      "tags": ["HOME"],
       "requestBody": {
         "required": true,
         "content": {
-          "application/json": {
+          "multipart/form-data": {
             "schema": {
               "type": "object",
-              "required": [
-                "first_name",
-                "last_name",
-                "email",
-                "country_code",
-                "phone_number",
-                "password"
-              ],
+              "required": ["name", "icon"],
               "properties": {
-                "first_name": {
+                "name": {
                   "type": "string",
-                  "example": "Ritesh"
+                  "example": "Fruits"
                 },
-                "last_name": {
+                "icon": {
                   "type": "string",
-                  "example": "Kumar"
-                },
-                "email": {
-                  "type": "string",
-                  "format": "email",
-                  "example": "ritesh@gmail.com"
-                },
-                "country_code": {
-                  "type": "string",
-                  "example": "+91"
-                },
-                "phone_number": {
-                  "type": "string",
-                  "example": "9876543210"
-                },
-                "password": {
-                  "type": "string",
-                  "example": "123456"
+                  "format": "binary"
                 }
               }
             }
@@ -65,34 +493,34 @@
       },
       "responses": {
         "200": {
-          "description": "User Registered Successfully",
+          "description": "Category added successfully",
           "content": {
             "application/json": {
               "example": {
                 "status": true,
-                "message": "User Registered Successfully"
+                "message": "Category added successfully"
               }
             }
           }
         },
         "400": {
-          "description": "Validation Error",
+          "description": "Category already exists or validation error",
           "content": {
             "application/json": {
               "example": {
                 "status": false,
-                "message": "Invalid input data"
+                "message": "Category already exist"
               }
             }
           }
         },
-        "409": {
-          "description": "User Already Exists",
+        "422": {
+          "description": "Missing icon file",
           "content": {
             "application/json": {
               "example": {
                 "status": false,
-                "message": "User already Registered"
+                "message": "Category icon required"
               }
             }
           }
@@ -109,7 +537,175 @@
           }
         }
       }
-         }
+    }
+     },
+     "/home/edit-category/{id}": {
+     "post": {
+      "summary": "Edit Category",
+      "description": "Update category name and/or icon",
+      "tags": ["HOME"],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Category ID",
+          "schema": {
+            "type": "string",
+            "example": "uuid"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": false,
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Vegetables"
+                },
+                "icon": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Category updated successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Category updated successfully"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Category not found or validation error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Category not found"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+     },
+     "/home/get-category": {
+     "get": {
+      "summary": "Get All Categories",
+      "description": "Fetch all categories",
+       "tags": ["HOME"],
+      "responses": {
+        "200": {
+          "description": "Category fetched successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Category fetched successfully",
+                "data": [
+                  {
+                    "id": "uuid",
+                    "name": "Fruits",
+                    "icon": "uploads/category/fruits.png",
+                    "createdAt": "2026-05-05T10:00:00.000Z",
+                    "updatedAt": "2026-05-05T10:00:00.000Z"
+                  }
+                ]
+              }
+             }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+     },
+     "/home/delete-category/{id}": {
+     "post": {
+      "summary": "Delete Category",
+      "description": "Delete a category by ID",
+      "tags": ["HOME"],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Category ID",
+          "schema": {
+            "type": "string",
+            "example": "uuid"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Category deleted successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Category deleted successfully"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Category not found",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Category not found"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
      }
 
 

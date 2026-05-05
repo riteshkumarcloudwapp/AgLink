@@ -18,8 +18,9 @@ export function up(knex) {
     table.enum("role", ["admin", "customer", "seller"]).defaultTo("customer");
     table.decimal("rating", 2, 1).defaultTo(0);
     table.string("otp").defaultTo(null);
-    table.string("expiry_time").defaultTo(null)
-    table.boolean("is_verified").defaultTo(false)
+    table.string("expiry_time").defaultTo(null);
+    table.string("last_sent_at").defaultTo(null);
+    table.boolean("is_verified").defaultTo(false);
     table.enum("status", ["block", "unblock"]).defaultTo("unblock");
     table.timestamps(true, true); 
   })

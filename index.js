@@ -7,6 +7,7 @@ import swaggerUi from "swagger-ui-express";
 
 //routes
 import user from "./src/api/user/index.js";
+import home from "./src/api/admin/home/index.js";
 
 const app = express();
 
@@ -22,7 +23,7 @@ app.use('/assets', express.static('assets'));
 app.get('/', (req,res)=>{
     res.json({message : "Hello from the server"})
 });
-
+  
 // swagger for API documentation
 const swagger = JSON.parse(
   fs.readFileSync(new URL("./swagger.json", import.meta.url))
@@ -39,6 +40,8 @@ console.log(`Database connected to url ${connectDb.url}`)
 
 //routes
 app.use('/user',user);
+app.use('/home',home);
+
 
 //server
 app.listen(config.PORT, ()=>{

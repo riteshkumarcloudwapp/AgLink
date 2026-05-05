@@ -81,6 +81,11 @@ const User = (sequelize) => {
       allowNull: true,
     },
 
+    last_sent_at: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
     is_verified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
