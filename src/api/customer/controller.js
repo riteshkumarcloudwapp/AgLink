@@ -1,3 +1,4 @@
+import models from "../../models/index.js"
 
 /**
  * @method POST

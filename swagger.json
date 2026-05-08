@@ -394,7 +394,7 @@
     }
   }
      },
-    "/user/resend-otp": {
+     "/user/resend-otp": {
     "post": {
     "summary": "Resend OTP",
     "description": "Resends OTP to user's email with rate limiting (60 seconds).",
@@ -461,6 +461,84 @@
           }
         }
       }
+    }
+  }
+     },
+     "/user/role-change": {
+    "post": {
+    "summary": "Change User Role",
+    "description": "Toggle authenticated user role between customer and seller",
+    "tags": ["USER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Role changed successfully",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "changedToSeller": {
+                "value": {
+                  "status": true,
+                  "message": "Role changed to seller"
+                }
+              },
+
+              "changedToCustomer": {
+                "value": {
+                  "status": true,
+                  "message": "Role changed to customer"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "User not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "User not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Authentication failed. No token provided."
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
     }
   }
      },
@@ -706,16 +784,1058 @@
         }
       }
     }
+     },
+
+     "/home/add-subCategory": {
+    "post": {
+      "summary": "Add SubCategory",
+      "description": "Create a new subcategory with image upload",
+      "tags": ["HOME"],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "type": "object",
+              "required": ["name", "category_id", "image"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Mobiles"
+                },
+                "category_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "b3c1a6b2-7b2f-4c6e-9f1a-123456789abc"
+                },
+                "image": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "SubCategory added successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "subCategory added successfully"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Validation or input error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Category not found"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+     },
+     "/home/edit-subCategory/{id}": {
+     "post": {
+      "summary": "Edit SubCategory",
+      "description": "Update subcategory name and image",
+      "tags": ["HOME"],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "SubCategory ID",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "b3c1a6b2-7b2f-4c6e-9f1a-123456789abc"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": false,
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Updated Name"
+                },
+                "image": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "SubCategory updated successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "subCategory updated successfully"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "SubCategory not found",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "subCategory not found"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+     },
+     "/home/get-subCategory": {
+     "get": {
+      "summary": "Get All SubCategories",
+      "description": "Fetch all active subcategories",
+      "tags": ["HOME"],
+      "parameters": [
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "description": "Page number",
+          "schema": {
+            "type": "integer",
+            "example": 1
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Number of records per page",
+          "schema": {
+            "type": "integer",
+            "example": 10
+          }
+        },
+        {
+          "name": "search",
+          "in": "query",
+          "required": false,
+          "description": "Search by subcategory name",
+          "schema": {
+            "type": "string",
+            "example": "mobile"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "SubCategory fetched successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "subCategory fetched successfully",
+                "data": [
+                  {
+                    "id": "uuid",
+                    "name": "Mobiles",
+                    "image": "uploads/subcategory/image.png",
+                    "category_id": "uuid",
+                    "status": "active",
+                    "created_at": "2026-05-05T10:00:00.000Z"
+                  }
+                ],
+                "pagination": {
+                  "total": 1,
+                  "page": 1,
+                  "limit": 10,
+                  "totalPages": 1
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Bad Request",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Invalid query params"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+
+     },
+     "/home/delete-subCategory/{id}": {
+      "post": {
+      "summary": "Delete SubCategory",
+      "description": "Delete a subcategory by ID",
+      "tags": ["HOME"],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "SubCategory ID",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "b3c1a6b2-7b2f-4c6e-9f1a-123456789abc"
+          }
+        }
+       ],
+      "responses": {
+        "200": {
+          "description": "SubCategory deleted successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "subCategory deleted successfully"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "SubCategory not found",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "subCategory not found"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+     },
+
+     "/home/add-variety": {
+      "post": {
+        "summary": "Add Variety",
+        "description": "Create a new variety with image upload",
+        "tags": ["HOME"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "sub_category_id", "image"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Tomato"
+                  },
+                  "sub_category_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Variety added successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": true,
+                  "message": "variety added successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation or business error",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "missingImage": {
+                    "value": {
+                      "status": false,
+                      "message": "variety image required"
+                    }
+                  },
+                  "duplicate": {
+                    "value": {
+                      "status": false,
+                      "message": "variety already exist"
+                    }
+                  },
+                  "subCategoryNotFound": {
+                    "value": {
+                      "status": false,
+                      "message": "subCategory not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+     },
+     "/home/edit-variety/{id}": {
+     "post": {
+        "summary": "Edit Variety",
+        "description": "Update variety name and/or image",
+        "tags": ["HOME"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Variety ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Updated Tomato"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Variety updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": true,
+                  "message": "variety updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "notFound": {
+                    "value": {
+                      "status": false,
+                      "message": "variety not found"
+                    }
+                  },
+                  "validationError": {
+                    "value": {
+                      "status": false,
+                      "message": "Invalid input"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+     },
+     "/home/get-variety": {
+      "get": {
+        "summary": "Get All Varieties",
+        "description": "Fetch all active varieties ordered by latest created",
+        "tags": ["HOME"],
+        "responses": {
+          "200": {
+            "description": "Varieties fetched successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": true,
+                  "message": "variety fetched successfully",
+                  "data": [
+                    {
+                      "id": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0",
+                      "name": "Tomato",
+                      "image": "uploads/varieties/tomato.png",
+                      "sub_category_id": "a1b2c3d4-5678-9101-1121-314151617181",
+                      "status": "active",
+                      "created_at": "2026-05-06T10:00:00.000Z",
+                      "updated_at": "2026-05-06T10:00:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": false,
+                  "message": "Something went wrong"
+                }
+              }
+            }
+          }
+        }
+      }
+     },
+     "/home/delete-variety/{id}": {
+     "post": {
+        "summary": "Delete Variety",
+        "description": "Delete a variety by ID and remove its image from server",
+        "tags": ["HOME"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Variety ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Variety deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": true,
+                  "message": "variety deleted successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "notFound": {
+                    "value": {
+                      "status": false,
+                      "message": "variety not found"
+                    }
+                  },
+                  "serverError": {
+                    "value": {
+                      "status": false,
+                      "message": "Something went wrong"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+     },
+ 
+     "/seller/add-shop": {
+  "post": {
+    "summary": "Shop Registration",
+    "description": "Register a new shop and submit application for verification",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "multipart/form-data": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "shop_name",
+              "shop_keeper_name",
+              "email",
+              "phone",
+              "address",
+              "latitude",
+              "longitude",
+              "image"
+            ],
+
+            "properties": {
+
+              "shop_name": {
+                "type": "string",
+                "example": "Fresh Vegetable Store"
+              },
+
+              "shop_keeper_name": {
+                "type": "string",
+                "example": "Ritesh Kumar"
+              },
+
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "shop@example.com"
+              },
+
+              "phone": {
+                "type": "string",
+                "example": "9876543210"
+              },
+
+              "address": {
+                "type": "string",
+                "example": "Lucknow, Uttar Pradesh"
+              },
+
+              "latitude": {
+                "type": "string",
+                "example": "26.8467"
+              },
+
+              "longitude": {
+                "type": "string",
+                "example": "80.9462"
+              },
+
+              "image": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Shop registration response",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "success": {
+                "value": {
+                  "status": true,
+                  "message": "Application submitted for Verification"
+                }
+              },
+
+              "alreadyExists": {
+                "value": {
+                  "status": false,
+                  "message": "Shop already exist"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation or image error",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "imageRequired": {
+                "value": {
+                  "status": false,
+                  "message": "Image is required"
+                }
+              },
+
+              "validationError": {
+                "value": {
+                  "status": false,
+                  "message": "Invalid input"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Authentication failed. No token provided."
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/seller/add-product": {
+    "post": {
+    "summary": "Add Product",
+    "description": "Create a new product for seller",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "category_id",
+              "sub_category_id",
+              "varieties_id",
+              "price",
+              "stock_qty",
+              "unit"
+            ],
+
+            "properties": {
+
+              "category_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+              },
+
+              "sub_category_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "11dabc5a-7bc2-4338-bd16-53fef1e9b4a0"
+              },
+
+              "varieties_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "22eabc5a-8bc2-4338-bd16-53fef1e9b4a0"
+              },
+
+              "price": {
+                "type": "string",
+                "example": "120.50"
+              },
+
+              "stock_qty": {
+                "type": "string",
+                "example": "50"
+              },
+
+              "unit": {
+                "type": "string",
+                "example": "kg"
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Product added successfully",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "success": {
+                "value": {
+                  "status": true,
+                  "message": "Product added successfully"
+                }
+              },
+
+              "alreadyExist": {
+                "value": {
+                  "status": false,
+                  "message": "Product already exist"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid input"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Authentication failed. No token provided."
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/seller/home": {
+    "get": {
+    "summary": "Seller Home API",
+    "description": "Fetch seller profile data along with categories, subcategories and varieties",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+      "200": {
+        "description": "Home data fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Home data fetched successfully",
+              "data": {
+                "seller": {
+                  "id": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0",
+                  "first_name": "Ritesh",
+                  "last_name": "Kumar",
+                  "profile_image": "uploads/profile/profile.png",
+                  "address": "Lucknow, Uttar Pradesh"
+                },
+
+                "categories": [
+                  {
+                    "id": "1",
+                    "name": "Vegetables",
+                    "status": "active",
+
+                    "subCategories": [
+                      {
+                        "id": "11",
+                        "name": "Leafy Vegetables",
+                        "status": "active",
+
+                        "varieties": [
+                          {
+                            "id": "111",
+                            "name": "Spinach",
+                            "status": "active"
+                          },
+                          {
+                            "id": "112",
+                            "name": "Coriander",
+                            "status": "active"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Seller not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Seller not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Authentication failed. No token provided."
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/seller/stock-update/{id}": {
+     "post": {
+    "summary": "Update Product Stock",
+    "description": "Update product stock quantity or remove product when status is closed",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Product ID",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+        }
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["action"],
+            "properties": {
+
+              "stock_qty": {
+                "type": "string",
+                "example": "20"
+              },
+
+              "action": {
+                "type": "string",
+                "enum": ["add", "remove"],
+                "example": "add"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Stock updated or removed successfully",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "stockUpdated": {
+                "value": {
+                  "status": true,
+                  "message": "Stock updated successfully"
+                }
+              },
+
+              "stockRemoved": {
+                "value": {
+                  "status": true,
+                  "message": "Stock removed successfully"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation or product error",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "productNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Product not found"
+                }
+              },
+
+              "invalidStatus": {
+                "value": {
+                  "status": false,
+                  "message": "Invalid status"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
      }
+
 
 
     },
 
-
-
     "components": {
     "securitySchemes": {
-        "BearerAuth": {
+    "BearerAuth": {
                 "type": "http",
                 "scheme": "bearer",
                 "bearerFormat": "JWT"

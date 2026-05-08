@@ -7,6 +7,27 @@ export function up(knex) {
     table.uuid("id").primary();
 
     table
+    .uuid("seller_id")
+    .notNullable()
+    .references("id")
+    .inTable("users")
+    .onDelete("CASCADE");
+
+    table           
+    .uuid("category_id")
+    .notNullable()
+    .references("id")
+    .inTable("categorys")
+    .onDelete("CASCADE");
+
+    table
+    .uuid("sub_category_id")
+    .notNullable()
+    .references("id")
+    .inTable("sub_categorys")
+    .onDelete("CASCADE");
+
+    table
     .uuid("varieties_id")
     .notNullable()
     .references("id")
@@ -14,8 +35,8 @@ export function up(knex) {
     .onDelete("CASCADE");
 
     table.decimal("price", 10, 2).nullable();
-    table.string("unit").notNullable(); // kg, piece, liter
     table.integer("stock_qty").defaultTo(0);
+    table.string("unit").notNullable(); // kg, piece, liter
     table.enum("status",["active", "inactive"]).notNullable().defaultTo("active");
     table.timestamps(true, true);
   });

@@ -269,6 +269,30 @@ export const resendOtp = async (req,res) => {
 }
 
 
+/**
+ * @method POST
+ * @description change role 
+ */
+export const roleChange = async (req, res) => {
+    try {
+        const currentUser = req.customer || req.seller;
 
+        const user = await models.User.findByPk( currentUser.id );
+        if(!user){
+            return res.send({status: false, message: "User not found"});
+        }
+
+        if( user.role === "customer" ){
+            await user.update({ role : "seller" });
+            return res.send({status: true, message: "Role changed to seller"});
+        }
+
+        await user.update({ role : "customer" });
+        return res.send({status: true, message: "Role changed to customer"});
+
+    } catch (error) {
+        return res.send({status: false, message: error.message});
+    }
+}
 
 

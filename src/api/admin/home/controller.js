@@ -44,14 +44,15 @@ export const editCategory = async (req, res) => {
             return res.send({ status:false, message: "Category not found" });
         }
 
-        if(req.file?.icon && category.icon){
+        //delete old icon
+        if(req.file && category.icon){
             const filePath = path.join( process.cwd(), category.icon );
             
             if( fs.existsSync(filePath) ) { fs.unlinkSync(filePath) }
         }
 
         await category.update({
-            name : name ?? category.name ,
+            name: name && name.trim() !== "" ? name : category.name,
             icon : req.file?.path ?? category.icon
         });
 
@@ -110,3 +111,232 @@ export const deleteCategory = async (req, res) => {
 }
 
 
+/**
+ * @method POST
+ * @description Adding Sub-Category
+*/
+export const addSubCategory = async (req, res) => {
+    try {
+        const {name, category_id} = req.body;
+        
+        const category = await models.Category.findByPk(category_id);
+            if (!category) {
+            return res.send({ status: false, message: "Category not found" });
+        }
+
+        const subCategory = await models.SubCategory.findOne({ where: {name, category_id} });
+        if(subCategory){
+            return res.send({ status:false, message: "subCategory already exist" });
+        }
+
+        const image = req.file?.path;
+        if(!image){
+            return res.send({ status:false, message: "subCategory image required" });
+        };
+
+        await models.SubCategory.create({
+            name  : name,
+            image : image,
+            category_id : category_id
+        });
+
+        return res.send({ status: true, message: "subCategory added successfully" });
+
+    } catch (error) {
+     return res.send({ status: false, message: error.message});   
+    }
+}
+
+/**
+ * @method POST
+ * @description Edit Sub-Category
+*/
+export const editSubCategory = async (req, res) => {
+    try {
+        const {name} = req.body;
+        const sub_category_id = req.params.id;
+        
+        const subCategory = await models.SubCategory.findByPk(sub_category_id);
+        if(!subCategory){
+            return res.send({ status:false, message: "subCategory not found" });
+        }
+
+        if(req.file && subCategory.image){
+            const filePath = path.join( process.cwd(), subCategory.image );
+            
+            if( fs.existsSync(filePath) ) { fs.unlinkSync(filePath) }
+        }
+
+        await subCategory.update({
+            name : name && name.trim() !== "" ? name : subCategory.name ,
+            image : req.file?.path ?? subCategory.image
+        });
+
+        return res.send({ status: true, message: "subCategory updated successfully" });
+
+    } catch (error) {
+     return res.send({ status: false, message: error.message});   
+    }
+}
+
+/**
+ * @method GET
+ * @description Get Sub-Category
+*/
+export const getAllSubCategory = async (req, res) => {
+    try {
+        const subCategory = await models.SubCategory.findAll({
+            where : { status: "active" } ,
+            order: [["created_at", "DESC"]]
+        });
+
+        return res.send({ status: true, message: "subCategory fetched successfully", data:subCategory });
+
+    } catch (error) {
+     return res.send({ status: false, message: error.message});   
+    }
+}
+
+/**
+ * @method POST
+ * @description Delete Sub-Category
+*/
+export const deleteSubCategory = async (req, res) => {
+    try {
+        const {id} = req.params;
+        
+        const subCategory = await models.SubCategory.findByPk(id);
+        if(!subCategory){
+            return res.send({ status:false, message: "subCategory not found" });
+        }
+
+        //delete icon from assets folder
+        if (subCategory.image) {
+            const filePath = path.join(process.cwd(), subCategory.image);
+
+            if (fs.existsSync(filePath)) { fs.unlinkSync(filePath) }
+        }
+
+        await subCategory.destroy();
+
+        return res.send({ status: true, message: "subCategory deleted successfully" });
+
+    } catch (error) {
+     return res.send({ status: false, message: error.message});   
+    }
+}
+
+/**
+ * @method POST
+ * @description Adding Varieties
+*/
+export const addVarieties = async (req, res) => {
+    try {
+        const {name, sub_category_id} = req.body;
+        
+        const subCategory = await models.SubCategory.findByPk(sub_category_id);
+            if (!subCategory) {
+            return res.send({ status: false, message: "subCategory not found" });
+        }
+
+        const variety = await models.Variety.findOne({ where: {name, sub_category_id} });
+        if(variety){
+            return res.send({ status:false, message: "variety already exist" });
+        }
+
+        const image = req.file?.path;
+        if(!image){
+            return res.send({ status:false, message: "variety image required" });
+        };
+
+        await models.Variety.create({
+            name  : name,
+            image : image,
+            sub_category_id : sub_category_id
+        });
+
+        return res.send({ status: true, message: "variety added successfully" });
+
+    } catch (error) {
+     return res.send({ status: false, message: error.message});   
+    }
+}
+
+/**
+ * @method POST
+ * @description Edit Varieties
+*/
+export const editVarieties = async (req, res) => {
+    try {
+        const {name} = req.body;
+        const {id} = req.params;
+        
+        const variety = await models.Variety.findByPk(id);
+        if(!variety){
+            return res.send({ status:false, message: "variety not found" });
+        }
+
+        if(req.file && variety.image){
+            const filePath = path.join( process.cwd(), variety.image );
+            
+            if( fs.existsSync(filePath) ) { fs.unlinkSync(filePath) }
+        }
+
+        await variety.update({
+            name : name && name.trim() !== "" ? name : variety.name ,
+            image : req.file?.path ?? variety.image
+        });
+
+        return res.send({ status: true, message: "variety updated successfully" });
+
+    } catch (error) {
+     return res.send({ status: false, message: error.message});   
+    }
+}
+
+/**
+ * @method GET
+ * @description Get Varieties
+*/
+export const getAllVarieties = async (req, res) => {
+    try {
+        const variety = await models.Variety.findAll({
+            where : { status: "active" } ,
+            order: [["created_at", "DESC"]]
+        });
+
+        return res.send({ status: true, message: "variety fetched successfully", data:variety });
+
+    } catch (error) {
+     return res.send({ status: false, message: error.message});   
+    }
+}
+
+/**
+ * @method POST
+ * @description Delete Varieties
+*/
+export const deleteVarieties = async (req, res) => {
+    try {
+        const {id} = req.params;
+        
+        const variety = await models.Variety.findByPk(id);
+        if(!variety){
+            return res.send({ status:false, message: "variety not found" });
+        }
+
+        //delete icon from assets folder
+        if (variety.image) {
+            const filePath = path.join(process.cwd(), variety.image);
+
+            if (fs.existsSync(filePath)) { fs.unlinkSync(filePath) }
+        }
+
+        await variety.destroy();
+
+        return res.send({ status: true, message: "variety deleted successfully" });
+
+    } catch (error) {
+     return res.send({ status: false, message: error.message});   
+    }
+}

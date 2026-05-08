@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 
 const User = (sequelize) => {
-  return sequelize.define(
+  const UserModel = sequelize.define(
   "User",
   {
     id: {
@@ -115,6 +115,7 @@ const User = (sequelize) => {
     updatedAt: "updated_at",
   }
 )
+  return UserModel;
 };
 
 export default User;

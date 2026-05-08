@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 
 const Variety = (sequelize) => {
-  return sequelize.define(
+  const VarietyModel = sequelize.define(
     "Variety",
     {
       id: {
@@ -50,25 +50,27 @@ const Variety = (sequelize) => {
     }
   );
 
-};
 
-//Associations
-  Variety.associate = (models) => {
+  //Associations
+  VarietyModel.associate = (models) => {
 
     //variety belongs to subcategory
-    Variety.belongsTo(models.SubCategory, {
+    VarietyModel.belongsTo(models.SubCategory, {
       foreignKey: "sub_category_id",
-      as: "sub_category",
-      onDelete: "CASCADE",
+      as: "subCategories",
     });
 
     //variety has many products
-    Variety.hasMany(models.Product, {
-      foreignKey: "variety_id",
+    VarietyModel.hasMany(models.Product, {
+      foreignKey: "varieties_id",
       as: "products",
       onDelete: "CASCADE",
     });
 
   };
+
+  return VarietyModel;
+};
+
 
 export default Variety;

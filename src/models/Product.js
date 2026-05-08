@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 
 const Product = (sequelize) => {
- return sequelize.define(
+  const ProductModel = sequelize.define(
     "Product",
     {
       id: {
@@ -11,24 +11,29 @@ const Product = (sequelize) => {
         defaultValue: DataTypes.UUIDV4,
       },
 
-      variety_id: {
+      seller_id: {
         type: DataTypes.UUID,
         allowNull: false,
       },
 
-      name: {
-        type: DataTypes.STRING,
+      category_id: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
+
+      sub_category_id: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
+
+      varieties_id: {
+        type: DataTypes.UUID,
         allowNull: false,
       },
 
       price: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
-
-      unit: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
 
       stock_qty: {
@@ -36,18 +41,26 @@ const Product = (sequelize) => {
         defaultValue: 0,
       },
 
+      unit: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+
       status: {
         type: DataTypes.ENUM("active", "inactive"),
+        allowNull: false,
         defaultValue: "active",
       },
 
       created_at: {
         type: DataTypes.DATE,
+        allowNull: false,
         defaultValue: DataTypes.NOW,
       },
 
       updated_at: {
         type: DataTypes.DATE,
+        allowNull: false,
         defaultValue: DataTypes.NOW,
       },
     },
@@ -57,20 +70,29 @@ const Product = (sequelize) => {
       createdAt: "created_at",
       updatedAt: "updated_at",
     }
-  )
-};
+  );
 
+  // Associations
+  ProductModel.associate = (models) => {
 
-//Associations
-Product.associate = (models) => {
-
-    Product.belongsTo(models.Variety, {
-      foreignKey: "variety_id",
-      as: "variety",
-      onDelete: "CASCADE",
+    ProductModel.belongsTo(models.Category, {
+      foreignKey: "category_id",
+      as: "category",
     });
-    
-};
 
+    ProductModel.belongsTo(models.SubCategory, {
+      foreignKey: "sub_category_id",
+      as: "sub_category",
+    });
+
+    ProductModel.belongsTo(models.Variety, {
+      foreignKey: "varieties_id",
+      as: "variety",
+    });
+
+  };
+
+  return ProductModel;
+};
 
 export default Product;

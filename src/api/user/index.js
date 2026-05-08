@@ -1,7 +1,8 @@
 import express from "express";
 import validate from "../../utils/validate.js";
-import { register, verifyOtp, logIn, forgetPassword, resetPassword, resendOtp } from "./controller.js";
+import { register, verifyOtp, logIn, forgetPassword, resetPassword, resendOtp, roleChange } from "./controller.js";
 import Joi from "joi";
+import {authenticateToken} from "../../common/middleware/authenticateToken.js"
 
 
 const router = express.Router();
@@ -72,6 +73,12 @@ router.post(
     })
   ),
    resendOtp
+);
+
+router.post(
+  "/role-change",
+   authenticateToken,
+   roleChange
 );
 
 export default router;

@@ -5,7 +5,7 @@ import models from "../../models/index.js"
 export const authenticateToken = async(req,res,next) => {
     let token = req.headers.authorization;
 
-    console.log("token", token)
+    // console.log("token", token)
 
     if(!token || !token.startsWith("Bearer")){
         return res.send({status: false, message: "Authentication failed. No token provided."});

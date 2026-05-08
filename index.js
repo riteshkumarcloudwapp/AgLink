@@ -8,6 +8,7 @@ import swaggerUi from "swagger-ui-express";
 //routes
 import user from "./src/api/user/index.js";
 import home from "./src/api/admin/home/index.js";
+import seller from "./src/api/seller/index.js";
 
 const app = express();
 
@@ -41,7 +42,7 @@ console.log(`Database connected to url ${connectDb.url}`)
 //routes
 app.use('/user',user);
 app.use('/home',home);
-
+app.use('/seller',seller)
 
 //server
 app.listen(config.PORT, ()=>{
