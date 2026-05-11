@@ -65,12 +65,7 @@ const User = (sequelize) => {
       type: DataTypes.ENUM("admin", "customer", "seller"),
       defaultValue: "customer",
     },
-
-    rating: {
-      type: DataTypes.DECIMAL(2, 1),
-      defaultValue: 0,
-    },
-
+    
     otp: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -115,6 +110,25 @@ const User = (sequelize) => {
     updatedAt: "updated_at",
   }
 )
+
+
+  // Associations
+  UserModel.associate = (models) => {
+
+    UserModel.hasOne(models.Shop, {
+      foreignKey: "seller_id",
+      as: "shop",
+    });
+    
+    UserModel.hasMany(models.CartItem, {
+      foreignKey: "customer_id",
+      as: "cart_items",
+    });
+
+
+
+  };
+
   return UserModel;
 };
 

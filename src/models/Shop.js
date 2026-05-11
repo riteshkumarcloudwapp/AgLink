@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 
 const Shop = (sequelize) => {
-  const ShopModel =  sequelize.define(
+  const ShopModel = sequelize.define(
     "Shop",
     {
       id: {
@@ -21,7 +21,7 @@ const Shop = (sequelize) => {
         allowNull: true
       },
 
-      shop_keeper_name: { 
+      shop_keeper_name: {
         type: DataTypes.STRING,
         allowNull: true
       },
@@ -56,6 +56,11 @@ const Shop = (sequelize) => {
         allowNull: true
       },
 
+      rating: {
+        type: DataTypes.DECIMAL(2, 1),
+        defaultValue: 0,
+      },
+
       status: {
         type: DataTypes.ENUM("Approved", "Pending", "Rejected"),
         defaultValue: "Pending"
@@ -85,6 +90,19 @@ const Shop = (sequelize) => {
       updatedAt: "updated_at"
     }
   );
+
+
+  // Associations
+  ShopModel.associate = (models) => {
+
+    ShopModel.belongsTo(models.User, {
+      foreignKey: "seller_id",
+      as: "seller",
+    });
+
+
+  };
+
   return ShopModel;
 };
 

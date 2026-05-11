@@ -1321,7 +1321,7 @@
      },
  
      "/seller/add-shop": {
-  "post": {
+    "post": {
     "summary": "Shop Registration",
     "description": "Register a new shop and submit application for verification",
     "tags": ["SELLER"],
@@ -1613,8 +1613,8 @@
   }
      },
      "/seller/home": {
-    "get": {
-    "summary": "Seller Home API",
+     "get": {
+     "summary": "Seller Home API",
     "description": "Fetch seller profile data along with categories, subcategories and varieties",
     "tags": ["SELLER"],
 
@@ -1827,8 +1827,588 @@
       }
     }
   }
-     }
+     },
 
+     "/customer/home": {
+    "get": {
+    "summary": "Home API",
+    "description": "Fetch customer profile, active categories, and best seller shops",
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Home data fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Home data fetched successfully",
+              "data": {
+
+                "customer": {
+                  "id": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0",
+                  "first_name": "Ritesh",
+                  "last_name": "Kumar",
+                  "image": "uploads/profile/profile.png",
+                  "address": "Lucknow, Uttar Pradesh"
+                },
+
+                "categories": [
+                  {
+                    "id": "11111111-2222-3333-4444-555555555555",
+                    "name": "Vegetables",
+                    "icon": "uploads/category/vegetables.png"
+                  },
+                  {
+                    "id": "66666666-7777-8888-9999-000000000000",
+                    "name": "Fruits",
+                    "icon": "uploads/category/fruits.png"
+                  }
+                ],
+
+                "bestSellers": [
+                  {
+                    "id": "shop-uuid-1",
+                    "shop_name": "Fresh Vegetable Store",
+                    "shop_keeper_name": "Ritesh Kumar",
+                    "rating": "4.8",
+                    "image": "uploads/shop/shop1.png",
+                    "address": "Lucknow"
+                  },
+                  {
+                    "id": "shop-uuid-2",
+                    "shop_name": "Organic Mart",
+                    "shop_keeper_name": "Aman Singh",
+                    "rating": "4.5",
+                    "image": "uploads/shop/shop2.png",
+                    "address": "Delhi"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Customer not found or validation error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Customer not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Authentication failed. No token provided."
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/get-subcategories/{id}": {
+     "get": {
+    "summary": "Get Sub Categories",
+    "description": "Fetch all active sub categories by category ID",
+    "tags": ["CUSTOMER"],
+
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Category ID",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+        }
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Sub categories fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "subCategory fetched successfully",
+              "data": [
+                {
+                  "id": "7a31c9a1-54e4-4dc2-8d77-f6e8c0f99a21",
+                  "name": "Vegetables",
+                  "image": "uploads/subcategory/vegetables.png"
+                },
+                {
+                  "id": "d1fbd8b0-c9c0-4d61-b72d-c8db9a9db9d0",
+                  "name": "Fruits",
+                  "image": "uploads/subcategory/fruits.png"
+                }
+              ]
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid category id"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/get-variety/{id}": {
+     "get": {
+    "summary": "Get Varieties",
+    "description": "Fetch all active varieties by sub category ID",
+    "tags": ["CUSTOMER"],
+
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Sub Category ID",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+        }
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Varieties fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Variety fetched successfully",
+              "data": [
+                {
+                  "id": "7a31c9a1-54e4-4dc2-8d77-f6e8c0f99a21",
+                  "name": "Tomato",
+                  "image": "uploads/variety/tomato.png"
+                },
+                {
+                  "id": "d1fbd8b0-c9c0-4d61-b72d-c8db9a9db9d0",
+                  "name": "Potato",
+                  "image": "uploads/variety/potato.png"
+                }
+              ]
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid sub category id"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/get-nearby-shops": {
+     "get": {
+    "summary": "Get Nearby Shops",
+    "description": "Fetch nearby approved shops based on latitude, longitude and radius. Shops are sorted by highest rating and nearest distance.",
+    "tags": ["CUSTOMER"],
+
+    "parameters": [
+
+      {
+        "name": "latitude",
+        "in": "query",
+        "required": true,
+        "description": "Customer latitude",
+        "schema": {
+          "type": "number",
+          "example": 22.7196
+        }
+      },
+
+      {
+        "name": "longitude",
+        "in": "query",
+        "required": true,
+        "description": "Customer longitude",
+        "schema": {
+          "type": "number",
+          "example": 75.8577
+        }
+      },
+
+      {
+        "name": "radius",
+        "in": "query",
+        "required": true,
+        "description": "Search radius in KM",
+        "schema": {
+          "type": "number",
+          "example": 5
+        }
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Nearby shops fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Nearby shops fetched successfully",
+              "data": [
+                {
+                  "id": "6b3fef62-40ff-4a7d-a0d1-7f3d8f1a1241",
+                  "shop_name": "Fresh Mart",
+                  "rating": "4.9",
+                  "distance": 1.2,
+                  "address": "Vijay Nagar, Indore"
+                },
+                {
+                  "id": "9ac98a42-83d9-4e8b-80a0-f9fbe4bb92b1",
+                  "shop_name": "Organic Hub",
+                  "rating": "4.5",
+                  "distance": 2.7,
+                  "address": "Palasia, Indore"
+                }
+              ]
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Latitude, longitude and radius are required"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/add-to-cart": {
+     "post": {
+    "summary": "Add Product To Cart",
+    "description": "Add a product to customer cart after validating product existence and stock quantity",
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": [
+              "product_id",
+              "qty"
+            ],
+            "properties": {
+
+              "product_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+              },
+
+              "qty": {
+                "type": "integer",
+                "example": 2
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Product added to cart successfully",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "success": {
+                "value": {
+                  "status": true,
+                  "message": "Products added to cart successfully"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation or cart related error",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "productNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Product not found"
+                }
+              },
+
+              "insufficientStock": {
+                "value": {
+                  "status": false,
+                  "message": "Insufficient stock"
+                }
+              },
+
+              "alreadyAdded": {
+                "value": {
+                  "status": false,
+                  "message": "Product already added to cart"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/customer/update-cart/{id}": {
+     "post": {
+    "summary": "Update Cart Quantity",
+    "description": "Increase or decrease product quantity in customer cart. If quantity becomes 0, cart item will be removed automatically.",
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Cart Item ID",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+        }
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": [
+              "action"
+            ],
+            "properties": {
+
+              "action": {
+                "type": "string",
+                "enum": ["increase", "decrease"],
+                "example": "increase"
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Cart updated successfully",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "quantityIncreased": {
+                "value": {
+                  "status": true,
+                  "message": "Quantity increased successfully"
+                }
+              },
+
+              "quantityDecreased": {
+                "value": {
+                  "status": true,
+                  "message": "Quantity decreased successfully"
+                }
+              },
+
+              "itemRemoved": {
+                "value": {
+                  "status": true,
+                  "message": "Item removed from cart"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation or cart related error",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "cartNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Cart item not found"
+                }
+              },
+
+              "invalidAction": {
+                "value": {
+                  "status": false,
+                  "message": "Invalid action"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     } 
+ 
 
 
     },

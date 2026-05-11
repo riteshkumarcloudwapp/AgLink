@@ -7,6 +7,7 @@ import SubCategory from "./SubCategory.js"
 import Variety from "./Variety.js";
 import Product from "./Product.js"
 import Shop from "./Shop.js"
+import CartItem from "./CartItem.js"
 
 const sequelize = new Sequelize(dbConfig.url, {
   ...dbConfig,
@@ -18,7 +19,8 @@ const models = {
   SubCategory      : SubCategory(sequelize, Sequelize.DataTypes),
   Variety          : Variety(sequelize, Sequelize.DataTypes),
   Product          : Product(sequelize, Sequelize.DataTypes),
-  Shop             : Shop(sequelize, Sequelize.DataTypes)
+  Shop             : Shop(sequelize, Sequelize.DataTypes),
+  CartItem         : CartItem(sequelize, Sequelize.DataTypes)
 };
 
 // Setup associations

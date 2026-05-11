@@ -16,7 +16,6 @@ export function up(knex) {
     table.decimal('latitude', 10, 8).nullable();
     table.decimal('longitude', 11, 8).nullable();
     table.enum("role", ["admin", "customer", "seller"]).defaultTo("customer");
-    table.decimal("rating", 2, 1).defaultTo(0);
     table.string("otp").defaultTo(null);
     table.string("expiry_time").defaultTo(null);
     table.string("last_sent_at").defaultTo(null);
