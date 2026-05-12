@@ -1,6 +1,9 @@
 import models from "../../models/index.js"
 import { Op } from "sequelize";
 import Sequelize from "sequelize"
+import stripe from "../../common/config/stripe.js"
+
+
 /**
  * @method POST
  * @description Home API
@@ -181,7 +184,7 @@ export const getNearByShops = async (req, res) => {
 
 /**
  * @method POST
- * @description Placed order to cart
+ * @description Placed product to cart
  */
 export const addToCart = async (req, res) => {
     try {
@@ -222,7 +225,7 @@ export const addToCart = async (req, res) => {
 
 /**
  * @method POST
- * @description Increase or decrease cart quantity
+ * @description Increase, decrease and remove cart quantity
  */
 export const updateCartQty = async (req, res) => {
     try {
@@ -271,3 +274,89 @@ export const updateCartQty = async (req, res) => {
         return res.send({status: false,message: error.message});
     }
 };
+
+/**
+ * @method POST
+ * @description Placed order
+ */
+export const placedOrder = async (req, res) => {
+    try {
+        const customer_id = req.customer.id;
+        const { shop_id, delivery_address, payment_method } = req.body;
+
+        //check shop exist or not
+        const shop = await models.Shop.findByPk(shop_id);
+        if(!shop) return res.send({ status: false, message: "Shop not found" });
+
+        //get cart iteams
+        const cartIteams = await models.CartItem.findAll({
+            where : { customer_id } ,
+
+            include : [
+                {
+                    model : models.Product,
+                    as : "product"
+                }
+            ]
+        });
+
+        if(cartIteams.length === 0) return res.send({ status: false, message: "Cart is empty" });
+
+        //check availablity of stocksQty + total amount
+
+        let totalAmount = 0;
+
+        cartIteams.map(iteam => {
+
+            if(iteam.product.stock_qty < iteam.qty){
+                return res.send({ status: false, message: `Insufficient stock for product ${iteam.product.name}` });
+            }
+
+            totalAmount += iteam.product.price * iteam.qty;
+        });
+
+        //COD
+        if( payment_method === "cod" ){
+            //create order
+            const order = await models.Order.create({
+                customer_id,
+                shop_id,
+                total_amount : totalAmount,
+                delivery_address,
+                payment_method
+            });
+
+            //create order Iteams
+            await models.OrderItem.create({
+                order_id : order.id,
+                product_id : cartIteams.product_id,
+                qty : cartIteams.qty,
+                price : cartIteams.product.price,
+                sub_total : totalAmount
+            })
+
+            //empty the cart
+            await models.CartItem.destroy({
+                where : { customer_id }
+            })
+            
+            return res.send({ status: true, message: "Order placed successfully", data: order});
+        }
+
+        //ONLINE
+        if( payment_method === "online" ){
+            // create payment Intent
+            
+        }
+
+
+
+
+         
+        
+
+    } catch (error) {
+        return res.send({status: false,message: error.message});
+    }
+};
+                                                 

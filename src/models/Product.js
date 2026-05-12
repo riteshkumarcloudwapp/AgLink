@@ -90,6 +90,13 @@ const Product = (sequelize) => {
       as: "variety",
     });
 
+    ProductModel.hasMany(models.CartItem, {
+      foreignKey: "product_id",
+      as: "cartItems",
+      OnDelete : "CASCADE"
+    });
+
+
   };
 
   return ProductModel;
