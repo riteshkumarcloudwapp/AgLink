@@ -1,32 +1,41 @@
 import express from "express";
 import validate from "../../utils/validate.js";
-import { home, getSubCategory, getVariety, getNearByShops, addToCart, updateCartQty } from "./controller.js";
+import { 
+   home, 
+   getSubCategory, 
+   getVariety, 
+   getNearByShops, 
+   addToCart, 
+   updateCartQty,
+   placedOrder,
+   confirmPayment
+ } from "./controller.js";
 import Joi from "joi";
 import createMulter from "../../utils/multer.js"
-import {authenticateToken} from "../../common/middleware/authenticateToken.js"
+import { authenticateToken } from "../../common/middleware/authenticateToken.js"
 
 const router = express.Router();
 
 //file
 
 router.get(
-   '/home', 
+   '/home',
    authenticateToken,
    home
 );
 
 router.get(
-   '/get-subcategories/:id', 
+   '/get-subcategories/:id',
    getSubCategory
 );
 
 router.get(
-   '/get-variety/:id', 
+   '/get-variety/:id',
    getVariety
 );
 
 router.get(
-   '/get-nearby-shops', 
+   '/get-nearby-shops',
    getNearByShops
 );
 
@@ -35,6 +44,7 @@ router.post(
    authenticateToken,
    validate(
       Joi.object({
+         shop_id: Joi.string().uuid().required(),
          product_id: Joi.string().uuid().required(),
          qty: Joi.number().integer().min(1).required()
       })
@@ -51,6 +61,31 @@ router.post(
       }).unknown(true)
    ),
    updateCartQty
+);
+
+router.post(
+   "/place-order",
+   authenticateToken,
+   validate(
+      Joi.object({
+         shop_id: Joi.string().uuid().required(),
+         delivery_address: Joi.string().required(),
+         payment_method: Joi.string().valid("cod", "online").required()
+      })
+   ),
+   placedOrder
+);
+
+router.post(
+   "/confirm-payment",
+   authenticateToken,
+   validate(
+      Joi.object({
+         order_id: Joi.string().uuid().required(),
+         payment_intent_id: Joi.string().required()
+      })
+   ),
+   confirmPayment
 );
 
 export default router;

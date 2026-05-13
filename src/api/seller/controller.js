@@ -1,5 +1,6 @@
 import models from "../../models/index.js";
 import { Op } from "sequelize";
+import {calculatePickupTimes} from "./service.js"
 
 /**
  * @method POST
@@ -208,6 +209,199 @@ export const stockUpdate = async (req, res) => {
 		return res.send({ status: false, message: error.message })
 	}
 }
+
+/**
+ * @method POST
+ * @description  view orders page
+ */
+export const getOrders = async (req, res) => {
+	try {
+		const seller_id = req.seller.id;
+
+		//find shop
+		const shop = await models.Shop.findOne({
+			where: { seller_id: seller_id }
+		})
+		if (!shop) {
+			return res.send({ status: false, message: "Shop not found" })
+		}
+
+		//fetch orders
+		const orders = await models.Order.findOne({
+			where: { shop_id: shop.id },
+
+			attributes: [
+				"id",
+				"total_amount"
+			],
+
+			include: [
+				{
+					model: models.User,
+					as: "customer",
+
+					attributes: [
+						"id",
+						"first_name",
+						"last_name",
+						"profile_image"
+					]
+				}
+			],
+			order: [["created_at", "DESC"]]
+		})
+
+		return res.send({ status: true, message: "orders fetched successfully", data: orders })
+	} catch (error) {
+		return res.send({ status: false, message: error.message })
+	}
+}
+
+/**
+ * @method POST
+ * @description View and update order status details
+ */
+export const viewOrderDetails = async (req, res) => {
+	try {
+		const seller_id = req.seller.id;
+		const order_id = req.params.id;
+
+		//check shop exist
+		const shop = await models.Shop.findOne({
+			where: { seller_id }
+		});
+		if (!shop) return res.send({ status: false, message: "Shop not found" });
+
+		//check order exist 
+		const order = await models.Order.findByPk(order_id);
+		if (!order) return res.send({ status: false, message: "Order not found" });
+
+		//fetch details of order
+		const orderDetails = await models.Order.findByPk(order_id, {
+			attributes: [
+				"id",
+				"total_amount"
+			],
+
+			include: [
+				{
+					model: models.User,
+					as: "customer",
+
+					attributes: [
+						'id',
+						"first_name",
+						"last_name",
+						"profile_image"
+					]
+				},
+				{
+					model: models.OrderItem,
+					as: "orderItems",
+
+					attributes: [
+						"product_id",
+						"qty"
+					],
+
+					include: [
+						{
+							model: models.Product,
+							as: "product",
+
+							attributes: [
+								"id",
+								"price",
+								"unit"
+							],
+
+							include: [
+								{
+									model: models.Variety,
+									as: "variety",
+
+									attributes: [
+										"id",
+										"name",
+										"image"
+									]
+								}
+							]
+						}
+					]
+				}
+
+			]
+
+		});
+
+		return res.send({ status: true, message: "order details fetched successfully!!", data: orderDetails });
+
+	} catch (error) {
+		return res.send({ status: false, message: error.message })
+	}
+}
+
+/**
+ * @method POST
+ * @description update order status details
+ */
+export const updateOrderStatus = async (req, res) => {
+	try {
+		const seller_id = req.seller.id;
+		const order_id = req.params.id;
+		const { order_status, PickUpTime} = req.body;
+
+		// validate status
+		if ( !["approved", "rejected", "completed"].includes(order_status)) {
+			return res.send({ status: false, message: "Invalid order status" });
+		}
+
+		// check seller shop
+		const shop = await models.Shop.findOne({
+			where: { seller_id }
+		});
+
+		if (!shop) return res.send({ status: false, message: "Shop not found"});
+
+		let pickup_start_time = null;
+		//time validation for pickup time
+		if (order_status === "approved") {
+			pickup_start_time = calculatePickupTimes(PickUpTime);
+		}
+
+		// check order exists
+		const order = await models.Order.findOne({
+
+			where: {
+				id: order_id,
+				shop_id: shop.id
+			}
+
+		});
+
+		if (!order) {
+			return res.send({ status: false, message: "Order not found"});
+		}
+
+		// update order status
+		await order.update({
+			order_status,
+			pickup_date:  new Date().toISOString().split("T")[0],
+			pickup_start_time : pickup_start_time
+		});
+
+		return res.send({ status: true, message: `Order ${order_status} successfully`, data: order });
+
+	} catch (error) {
+		return res.send({ status: false, message: error.message })
+	}
+}
+
+
+
+
+
 
 
 

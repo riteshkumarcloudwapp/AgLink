@@ -1,6 +1,14 @@
 import express from "express";
 import validate from "../../utils/validate.js";
-import { createShop, createProduct, home, stockUpdate } from "./controller.js";
+import { 
+   createShop, 
+   createProduct, 
+   home, 
+   stockUpdate, 
+   getOrders,
+   viewOrderDetails,
+   updateOrderStatus
+} from "./controller.js";
 import Joi from "joi";
 import createMulter from "../../utils/multer.js"
 import {authenticateToken} from "../../common/middleware/authenticateToken.js"
@@ -56,12 +64,45 @@ router.post(
 	 validate(
 		 Joi.object({
 			  id         : Joi.string().uuid().required(),
-        stock_qty  : Joi.string().required(),
-				action     : Joi.string().valid("add", "remove").required()
+           stock_qty  : Joi.string().required(),
+			  action     : Joi.string().valid("add", "remove").required()
     })
 	 ),
    stockUpdate
 );
+
+router.get(
+   '/get-orders', 
+   authenticateToken,
+   getOrders
+);
+
+router.post(
+   "/view-order-details/:id",
+   authenticateToken,
+   viewOrderDetails
+);
+
+router.post(
+   "/update-order-status/:id",
+   authenticateToken,
+   validate(
+      Joi.object({
+         order_status: Joi.string()
+            .valid(
+               "approved",
+               "rejected",
+               "completed"
+            )
+            .required(),
+
+         PickUpTime: Joi.string().required()
+
+      }).unknown(true)
+   ),
+   updateOrderStatus
+);
+
 
 
 export default router;

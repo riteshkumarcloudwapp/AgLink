@@ -16,6 +16,11 @@ const CartItem = (sequelize) => {
         allowNull: false,
       },
 
+      shop_id: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
+
       product_id: {
         type: DataTypes.UUID,
         allowNull: false,
@@ -61,6 +66,13 @@ const CartItem = (sequelize) => {
       foreignKey: "product_id",
       as: "product",
     });
+
+    // cart belongs to shop
+    CartItemModel.belongsTo(models.Shop, {
+      foreignKey: "shop_id",
+      as: "shop"
+    });
+
 
   };
 

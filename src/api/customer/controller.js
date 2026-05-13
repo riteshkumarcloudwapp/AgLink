@@ -189,30 +189,39 @@ export const getNearByShops = async (req, res) => {
 export const addToCart = async (req, res) => {
     try {
         const customer_id = req.customer.id;
-        const { product_id, qty } = req.body;
+        const { shop_id, product_id, qty } = req.body;
+
+        // check shop exists
+        const shop = await models.Shop.findByPk(shop_id);
+
+        if (!shop) {
+            return res.send({ status: false, message: "Shop not found" });
+        }
 
         // check product exists
         const product = await models.Product.findByPk(product_id);
 
-        if (!product) { return res.send({status: false, message: "Product not found"})}
+        if (!product) { return res.send({ status: false, message: "Product not found" }) }
 
         //check stock qty
-        if( product.stock_qty < qty ){
-            return res.send({ status:false, message: "Insufficient stock" })
+        if (product.stock_qty < qty) {
+            return res.send({ status: false, message: "Insufficient stock" })
         }
 
         // check existing cart item
         const existingCart = await models.CartItem.findOne({
             where: {
                 customer_id,
+                shop_id,
                 product_id
             }
         });
 
-          if (existingCart) {return res.send({ status: false, message: "Product already added to cart" })}
+        if (existingCart) { return res.send({ status: false, message: "Product already added to cart" }) }
 
         await models.CartItem.create({
             customer_id,
+            shop_id,
             product_id,
             qty
         });
@@ -234,20 +243,38 @@ export const updateCartQty = async (req, res) => {
 
         const { action } = req.body;
 
-        const cartItem = await models.CartItem.findByPk(cart_id);
+        const cartItem = await models.CartItem.findByPk({
+            where: {
+                id: cart.id,
+                customer_id
+            },
+
+            include: [
+                {
+                    model: models.Product,
+                    as: "product"
+                }
+            ]
+        });
 
         if (!cartItem) {
-            return res.send({status: false,message: "Cart item not found"});
+            return res.send({ status: false, message: "Cart item not found" });
         }
 
         // INCREASE
         if (action === "increase") {
 
+            // stock validation
+            if (cartItem.product.stock_qty <= cartItem.qty) {
+
+                return res.send({ status: false, message: "Insufficient stock" });
+            }
+
             await cartItem.update({
                 qty: cartItem.qty + 1
             });
 
-            return res.send({status: true,message: "Quantity increased successfully"});
+            return res.send({ status: true, message: "Quantity increased successfully" });
         }
 
         // DECREASE
@@ -258,20 +285,20 @@ export const updateCartQty = async (req, res) => {
 
                 await cartItem.destroy();
 
-                return res.send({status: true,message: "Item removed from cart"});
+                return res.send({ status: true, message: "Item removed from cart" });
             }
 
             await cartItem.update({
                 qty: cartItem.qty - 1
             });
 
-            return res.send({status: true,message: "Quantity decreased successfully"});
+            return res.send({ status: true, message: "Quantity decreased successfully" });
         }
 
-        return res.send({status: false,message: "Invalid action"});
+        return res.send({ status: false, message: "Invalid action" });
 
     } catch (error) {
-        return res.send({status: false,message: error.message});
+        return res.send({ status: false, message: error.message });
     }
 };
 
@@ -286,21 +313,21 @@ export const placedOrder = async (req, res) => {
 
         //check shop exist or not
         const shop = await models.Shop.findByPk(shop_id);
-        if(!shop) return res.send({ status: false, message: "Shop not found" });
+        if (!shop) return res.send({ status: false, message: "Shop not found" });
 
         //get cart iteams
         const cartIteams = await models.CartItem.findAll({
-            where : { customer_id } ,
+            where: { customer_id },
 
-            include : [
+            include: [
                 {
-                    model : models.Product,
-                    as : "product"
+                    model: models.Product,
+                    as: "product"
                 }
             ]
         });
 
-        if(cartIteams.length === 0) return res.send({ status: false, message: "Cart is empty" });
+        if (cartIteams.length === 0) return res.send({ status: false, message: "Cart is empty" });
 
         //check availablity of stocksQty + total amount
 
@@ -308,55 +335,96 @@ export const placedOrder = async (req, res) => {
 
         cartIteams.map(iteam => {
 
-            if(iteam.product.stock_qty < iteam.qty){
+            if (iteam.product.stock_qty < iteam.qty) {
                 return res.send({ status: false, message: `Insufficient stock for product ${iteam.product.name}` });
             }
 
             totalAmount += iteam.product.price * iteam.qty;
         });
 
+        console.log("cartIteams----", cartIteams)
+
         //COD
-        if( payment_method === "cod" ){
+        if (payment_method === "cod") {
             //create order
             const order = await models.Order.create({
                 customer_id,
                 shop_id,
-                total_amount : totalAmount,
+                total_amount: totalAmount,
                 delivery_address,
                 payment_method
             });
 
-            //create order Iteams
-            await models.OrderItem.create({
-                order_id : order.id,
-                product_id : cartIteams.product_id,
-                qty : cartIteams.qty,
-                price : cartIteams.product.price,
-                sub_total : totalAmount
-            })
+            //create order Iteams   //cartIteams is an array
+            for (const item of cartIteams) {
+
+                await models.OrderItem.create({
+                    order_id: order.id,
+                    product_id: item.product_id,
+                    qty: item.qty,
+                    price: item.product.price,
+                    sub_total: item.qty * item.product.price
+                });
+            }
 
             //empty the cart
             await models.CartItem.destroy({
-                where : { customer_id }
+                where: { customer_id }
             })
-            
-            return res.send({ status: true, message: "Order placed successfully", data: order});
+
+            return res.send({ status: true, message: "Order placed successfully", data: order });
         }
 
         //ONLINE
-        if( payment_method === "online" ){
-            // create payment Intent
-            
+        if (payment_method === "online") {
+            // create stripe payment Intent
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: totalAmount,
+                currency: "usd",
+                metadata: {
+                    customer_id,
+                    shop_id,
+                    delivery_address
+                },
+            });
+
+            //create order
+            const order = await models.Order.create({
+                customer_id: customer_id,
+                shop_id: shop_id,
+                total_amount: totalAmount,
+                delivery_address: delivery_address,
+                payment_method: "online",
+                payment_status: "pending",
+                order_status: "pending",
+            });
+
+            return res.send({
+                status: true,
+                message: "Payment initiated",
+                client_secret: paymentIntent.client_secret,
+                order_id: order.id
+            });
+
         }
 
-
-
-
-         
-        
+        return res.send({ status: false, message: "Invalid payment method" });
 
     } catch (error) {
-        return res.send({status: false,message: error.message});
+        return res.send({ status: false, message: error.message });
     }
 };
-                                                 
+
+/**
+ * @method POST
+ * @description confirm payment Online stripe
+ */
+export const confirmPayment = async (req, res) => {
+    try {
+
+
+    } catch (error) {
+        return res.send({ status: false, message: error.message });
+    }
+};
+

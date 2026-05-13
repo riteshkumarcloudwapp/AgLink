@@ -5,9 +5,11 @@ import User from "./User.js"
 import Category from "./Category.js"
 import SubCategory from "./SubCategory.js"
 import Variety from "./Variety.js";
-import Product from "./Product.js"
-import Shop from "./Shop.js"
-import CartItem from "./CartItem.js"
+import Product from "./Product.js";
+import Shop from "./Shop.js";
+import CartItem from "./CartItem.js";
+import Order from "./Order.js";
+import OrderItem from "./OrderItem.js"; 
 
 const sequelize = new Sequelize(dbConfig.url, {
   ...dbConfig,
@@ -20,7 +22,10 @@ const models = {
   Variety          : Variety(sequelize, Sequelize.DataTypes),
   Product          : Product(sequelize, Sequelize.DataTypes),
   Shop             : Shop(sequelize, Sequelize.DataTypes),
-  CartItem         : CartItem(sequelize, Sequelize.DataTypes)
+  CartItem         : CartItem(sequelize, Sequelize.DataTypes),
+  Order            : Order(sequelize, Sequelize.DataTypes),
+  OrderItem        : OrderItem(sequelize, Sequelize.DataTypes)
+
 };
 
 // Setup associations

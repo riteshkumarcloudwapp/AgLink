@@ -1320,6 +1320,7 @@
       }
      },
  
+
      "/seller/add-shop": {
     "post": {
     "summary": "Shop Registration",
@@ -1828,6 +1829,296 @@
     }
   }
      },
+     "/seller/get-orders": {
+     "get": {
+    "summary": "View Seller Orders",
+    "description": "Fetch all orders received by seller shop",
+
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Orders fetched successfully",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "success": {
+                "value": {
+                  "status": true,
+                  "message": "Orders fetched successfully",
+                  "data": [
+                    {
+                      "id": "c91fd2f5-12c2-4b75-8e18-85f4d7ecf801",
+                      "total_amount": "250",
+                      "payment_method": "cod",
+                      "payment_status": "pending",
+                      "order_status": "pending",
+                      "created_at": "2026-05-13T10:00:00.000Z",
+
+                      "customer": {
+                        "id": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0",
+                        "first_name": "Ritesh",
+                        "last_name": "Kumar",
+                        "profile_image": "uploads/profile.png"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Business Logic Error",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "shopNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Shop not found"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/seller/view-order-details/{id}": {
+     "post": {
+    "summary": "View and Update Order Details",
+    "description": "Fetch order details and update order status",
+
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Order ID",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+        }
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Order details fetched or updated successfully",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "viewOrder": {
+                "value": {
+                  "status": true,
+                  "message": "Order details fetched successfully"
+                }
+              },
+
+              "approveOrder": {
+                "value": {
+                  "status": true,
+                  "message": "Order approved successfully"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Business Logic Error",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "shopNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Shop not found"
+                }
+              },
+
+              "orderNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Order not found"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/seller/update-order-status/{id}": {
+  "post": {
+    "summary": "Update Order Status",
+    "description": "Seller can approve, reject or complete order and assign pickup time",
+
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+        }
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+
+      "content": {
+        "application/json": {
+
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "order_status"
+            ],
+
+            "properties": {
+
+              "order_status": {
+                "type": "string",
+
+                "enum": [
+                  "approved",
+                  "rejected",
+                  "completed"
+                ],
+
+                "example": "approved"
+              },
+
+              "PickUpTime": {
+                "type": "string",
+                "example": "1 hr 30 mins"
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Order status updated successfully",
+
+        "content": {
+          "application/json": {
+
+            "example": {
+              "status": true,
+              "message": "Order approved successfully"
+            }
+
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation error",
+
+        "content": {
+          "application/json": {
+
+            "examples": {
+
+              "invalidStatus": {
+                "value": {
+                  "status": false,
+                  "message": "Invalid order status"
+                }
+              },
+
+              "pickupRequired": {
+                "value": {
+                  "status": false,
+                  "message": "PickUpTime is required"
+                }
+              }
+
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+
 
      "/customer/home": {
     "get": {
@@ -2178,9 +2469,10 @@
   }
      },
      "/customer/add-to-cart": {
-     "post": {
+    "post": {
     "summary": "Add Product To Cart",
-    "description": "Add a product to customer cart after validating product existence and stock quantity",
+    "description": "Add a product from a specific shop to customer cart",
+
     "tags": ["CUSTOMER"],
 
     "security": [
@@ -2191,27 +2483,36 @@
 
     "requestBody": {
       "required": true,
+
       "content": {
         "application/json": {
           "schema": {
             "type": "object",
+
             "required": [
+              "shop_id",
               "product_id",
               "qty"
             ],
+
             "properties": {
+
+              "shop_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+              },
 
               "product_id": {
                 "type": "string",
                 "format": "uuid",
-                "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+                "example": "c91fd2f5-12c2-4b75-8e18-85f4d7ecf801"
               },
 
               "qty": {
                 "type": "integer",
                 "example": 2
               }
-
             }
           }
         }
@@ -2221,7 +2522,8 @@
     "responses": {
 
       "200": {
-        "description": "Product added to cart successfully",
+        "description": "Product added successfully",
+
         "content": {
           "application/json": {
             "examples": {
@@ -2229,20 +2531,27 @@
               "success": {
                 "value": {
                   "status": true,
-                  "message": "Products added to cart successfully"
+                  "message": "Product added to cart successfully"
                 }
               }
-
             }
           }
         }
       },
 
       "400": {
-        "description": "Validation or cart related error",
+        "description": "Validation or business logic error",
+
         "content": {
           "application/json": {
             "examples": {
+
+              "shopNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Shop not found"
+                }
+              },
 
               "productNotFound": {
                 "value": {
@@ -2264,7 +2573,6 @@
                   "message": "Product already added to cart"
                 }
               }
-
             }
           }
         }
@@ -2272,6 +2580,7 @@
 
       "500": {
         "description": "Internal Server Error",
+
         "content": {
           "application/json": {
             "example": {
@@ -2281,14 +2590,14 @@
           }
         }
       }
-
     }
   }
      },
      "/customer/update-cart/{id}": {
-     "post": {
-    "summary": "Update Cart Quantity",
-    "description": "Increase or decrease product quantity in customer cart. If quantity becomes 0, cart item will be removed automatically.",
+    "post": {
+    "summary": "Increase or Decrease Cart Quantity",
+    "description": "Increase, decrease or remove product quantity from cart",
+
     "tags": ["CUSTOMER"],
 
     "security": [
@@ -2313,13 +2622,14 @@
 
     "requestBody": {
       "required": true,
+
       "content": {
         "application/json": {
           "schema": {
             "type": "object",
-            "required": [
-              "action"
-            ],
+
+            "required": ["action"],
+
             "properties": {
 
               "action": {
@@ -2327,7 +2637,6 @@
                 "enum": ["increase", "decrease"],
                 "example": "increase"
               }
-
             }
           }
         }
@@ -2338,38 +2647,39 @@
 
       "200": {
         "description": "Cart updated successfully",
+
         "content": {
           "application/json": {
             "examples": {
 
-              "quantityIncreased": {
+              "increase": {
                 "value": {
                   "status": true,
                   "message": "Quantity increased successfully"
                 }
               },
 
-              "quantityDecreased": {
+              "decrease": {
                 "value": {
                   "status": true,
                   "message": "Quantity decreased successfully"
                 }
               },
 
-              "itemRemoved": {
+              "remove": {
                 "value": {
                   "status": true,
                   "message": "Item removed from cart"
                 }
               }
-
             }
           }
         }
       },
 
       "400": {
-        "description": "Validation or cart related error",
+        "description": "Validation or business logic error",
+
         "content": {
           "application/json": {
             "examples": {
@@ -2381,13 +2691,19 @@
                 }
               },
 
+              "insufficientStock": {
+                "value": {
+                  "status": false,
+                  "message": "Insufficient stock"
+                }
+              },
+
               "invalidAction": {
                 "value": {
                   "status": false,
                   "message": "Invalid action"
                 }
               }
-
             }
           }
         }
@@ -2395,6 +2711,7 @@
 
       "500": {
         "description": "Internal Server Error",
+
         "content": {
           "application/json": {
             "example": {
@@ -2404,10 +2721,152 @@
           }
         }
       }
-
     }
   }
-     } 
+     }, 
+     "/customer/place-order": { 
+     "post": {
+    "summary": "Place Order",
+    "description": "Place order using COD or Online payment method",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "shop_id",
+              "delivery_address",
+              "payment_method"
+            ],
+
+            "properties": {
+
+              "shop_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+              },
+
+              "delivery_address": {
+                "type": "string",
+                "example": "Near City Mall, Delhi"
+              },
+
+              "payment_method": {
+                "type": "string",
+                "enum": ["cod", "online"],
+                "example": "online"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Order placed or payment initiated successfully",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "codOrder": {
+                "value": {
+                  "status": true,
+                  "message": "Order placed successfully",
+                  "data": {
+                    "id": "2fded9d7-b1d7-4f4a-8e13-c4b77fd62f21",
+                    "customer_id": "4fcbf11b-28e4-4f7e-9a76-bf05d95cb8b3",
+                    "shop_id": "1a0ceac0-bfd6-4a72-bef3-746e6cf2f111",
+                    "total_amount": 450,
+                    "payment_method": "cod",
+                    "payment_status": "pending",
+                    "order_status": "pending"
+                  }
+                }
+              },
+
+              "onlineOrder": {
+                "value": {
+                  "status": true,
+                  "message": "Payment initiated",
+                  "client_secret": "pi_3Rxxx_secret_xxx",
+                  "order_id": "2fded9d7-b1d7-4f4a-8e13-c4b77fd62f21"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation or business logic error",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "shopNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Shop not found"
+                }
+              },
+
+              "cartEmpty": {
+                "value": {
+                  "status": false,
+                  "message": "Cart is empty"
+                }
+              },
+
+              "insufficientStock": {
+                "value": {
+                  "status": false,
+                  "message": "Insufficient stock for product Apple"
+                }
+              },
+
+              "invalidPaymentMethod": {
+                "value": {
+                  "status": false,
+                  "message": "Invalid payment method"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     }
  
 
 

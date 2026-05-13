@@ -85,6 +85,7 @@ const Product = (sequelize) => {
       as: "sub_category",
     });
 
+    //every product belongs to variety
     ProductModel.belongsTo(models.Variety, {
       foreignKey: "varieties_id",
       as: "variety",
@@ -96,6 +97,12 @@ const Product = (sequelize) => {
       OnDelete : "CASCADE"
     });
 
+    //every product has many order items
+    ProductModel.hasMany(models.OrderItem, {
+      foreignKey: "product_id",
+      as: "orderItems",
+      onDelete: "CASCADE",
+    });
 
   };
 

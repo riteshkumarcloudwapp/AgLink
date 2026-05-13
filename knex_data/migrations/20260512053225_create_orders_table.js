@@ -38,13 +38,16 @@ export function up(knex) {
 
         table.enum("order_status", [
             "pending",
-            "accepted",
+            "approved",
             "packed",
             "out_for_delivery",
             "delivered",
             "cancelled",
             "rejected"
-        ]).defaultTo("accepted");
+        ]).defaultTo("pending");
+
+        table.date("pickup_date").nullable();
+        table.string("pickup_start_time").nullable();
 
         table.timestamps(true, true);
 

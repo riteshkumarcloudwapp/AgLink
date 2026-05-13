@@ -56,7 +56,7 @@ const Order = (sequelize) => {
       order_status: {
         type: DataTypes.ENUM(
           "pending",
-          "accepted",
+          "approved",
           "packed",
           "out_for_delivery",
           "delivered",
@@ -65,6 +65,16 @@ const Order = (sequelize) => {
         ),
         allowNull: false,
         defaultValue: "pending",
+      },
+
+      pickup_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
+      },
+
+      pickup_start_time: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
 
       created_at: {
@@ -103,6 +113,13 @@ const Order = (sequelize) => {
       as: "shop",
       onDelete: "CASCADE",
     });
+
+    //order hasmany products listed in orderIteams
+    OrderModel.hasMany(models.OrderItem, {
+      foreignKey: "order_id",
+      as: "orderItems",
+      onDelete: "CASCADE",
+    })
 
   };
 
