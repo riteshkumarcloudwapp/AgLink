@@ -6,8 +6,12 @@ import {
    home, 
    stockUpdate, 
    getOrders,
+   ordersList,
    viewOrderDetails,
-   updateOrderStatus
+   updateOrderStatus,
+   updateSellerProfile,
+   logout,
+   deleteAccount
 } from "./controller.js";
 import Joi from "joi";
 import createMulter from "../../utils/multer.js"
@@ -96,13 +100,44 @@ router.post(
             )
             .required(),
 
-         PickUpTime: Joi.string().required()
+         preparation_time: Joi.string().required()
 
       }).unknown(true)
    ),
    updateOrderStatus
 );
 
+router.post(
+   "/update-profile",
+   authenticateToken,
+   sellerImage.single("profile_image"),
+   validate(
+      Joi.object({
+         first_name : Joi.string().optional().allow("", null),
+         last_name  : Joi.string().optional().allow("", null),
+         email      : Joi.string().email().optional().allow("", null)
+      })
+   ),
+   updateSellerProfile
+);
+
+router.get(
+   "/logout",
+   authenticateToken,
+   logout
+);
+
+router.post(
+   "/delete-account",
+   authenticateToken,
+   deleteAccount
+);
+
+router.get(
+   "/orders-list",
+   authenticateToken,
+   ordersList
+);
 
 
 export default router;

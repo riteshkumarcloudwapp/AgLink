@@ -13,6 +13,12 @@ export function up(knex) {
     .inTable("users")
     .onDelete("CASCADE");
 
+     table
+      .uuid("shop_id")
+      .references("id")
+      .inTable("shops")
+      .onDelete("CASCADE");
+
     table           
     .uuid("category_id")
     .notNullable()

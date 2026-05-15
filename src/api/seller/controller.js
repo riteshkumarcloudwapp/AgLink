@@ -1,6 +1,6 @@
 import models from "../../models/index.js";
 import { Op } from "sequelize";
-import {calculatePickupTimes} from "./service.js"
+import { timeFormatter } from "./service.js"
 
 /**
  * @method POST
@@ -350,10 +350,10 @@ export const updateOrderStatus = async (req, res) => {
 	try {
 		const seller_id = req.seller.id;
 		const order_id = req.params.id;
-		const { order_status, PickUpTime} = req.body;
+		const { order_status, preparation_time } = req.body;
 
 		// validate status
-		if ( !["approved", "rejected", "completed"].includes(order_status)) {
+		if (!["approved", "rejected"].includes(order_status)) {
 			return res.send({ status: false, message: "Invalid order status" });
 		}
 
@@ -361,14 +361,7 @@ export const updateOrderStatus = async (req, res) => {
 		const shop = await models.Shop.findOne({
 			where: { seller_id }
 		});
-
-		if (!shop) return res.send({ status: false, message: "Shop not found"});
-
-		let pickup_start_time = null;
-		//time validation for pickup time
-		if (order_status === "approved") {
-			pickup_start_time = calculatePickupTimes(PickUpTime);
-		}
+		if (!shop) return res.send({ status: false, message: "Shop not found" });
 
 		// check order exists
 		const order = await models.Order.findOne({
@@ -379,19 +372,113 @@ export const updateOrderStatus = async (req, res) => {
 			}
 
 		});
+		if (!order) { return res.send({ status: false, message: "Order not found" }) }
 
-		if (!order) {
-			return res.send({ status: false, message: "Order not found"});
+		let pickup_start_time = null;
+		let pickup_end_time = null;
+
+		if (order_status === "approved") {
+
+			if (!preparation_time) return res.send({ status: false, message: "preparation_time is required" });
+
+			//calculation of pickUpStartTime
+			pickup_start_time = timeFormatter(preparation_time);
+			//calculation of pickUpEndTime
+			pickup_end_time = new Date(pickup_start_time);
+			pickup_end_time.setMinutes(pickup_end_time.getMinutes() + 15);  //adding 15 mins default time end time
+
+			// update order status
+			await order.update({
+				order_status,
+				preparation_time,
+				pickup_start_time,
+				pickup_end_time
+			});
+
+			return res.send({ status: true, message: `Order ${order_status} successfully`, data: order });
 		}
 
-		// update order status
 		await order.update({
-			order_status,
-			pickup_date:  new Date().toISOString().split("T")[0],
-			pickup_start_time : pickup_start_time
+			order_status
 		});
 
-		return res.send({ status: true, message: `Order ${order_status} successfully`, data: order });
+		return res.send({ status: true, message: `Order Rejected successfully` });
+
+	} catch (error) {
+		return res.send({ status: false, message: error.message })
+	}
+}
+
+/**
+ * @method POST
+ * @description update seller profile
+ */
+export const updateSellerProfile = async (req, res) => {
+	try {
+		const seller_id = req.seller.id;
+		const { first_name, last_name, email } = req.body;
+
+		const seller = await models.User.findByPk(seller_id);
+		if (!seller) {
+			return res.send({ status: false, message: "Seller not found" });
+		}
+
+		// check email uniqueness
+		if (email && email !== seller.email) {
+
+			const existingSeller = await models.User.findOne({
+				where: { email }
+			});
+
+			if (existingSeller) return res.send({ status: false, message: "Email already exists" });
+		}
+
+		let imagePath = null;
+		if (req.file) {
+			imagePath = req.file?.path;
+		}
+
+		await seller.update({
+			profile_image: imagePath || seller.profile_image,
+			first_name: (first_name === "" || first_name === null) ? seller.first_name : first_name,
+			last_name: (last_name === "" || last_name === null) ? seller.last_name : last_name,
+			email: (email === "" || email === null) ? seller.email : email
+		});
+
+		return res.send({ status: true, message: "Profile updated successfully", data: seller });
+
+	} catch (error) {
+		return res.send({ status: false, message: error.message })
+	}
+}
+
+/**
+ * @method GET 
+ * @description logout seller
+ */
+export const logout = async (req, res) => {
+	try {
+		return res.send({ status: true, message: "Seller logout successful" });
+	} catch (error) {
+		return res.send({ status: false, message: error.message })
+	}
+}
+
+/**
+ * @method POST
+ * @description Delete seller account
+ */
+export const deleteAccount = async (req, res) => {
+	try {
+		const sellerId = req.seller.id;
+
+		const seller = await models.User.findByPk(sellerId);
+		if (!seller) return res.send({ status: false, message: "Seller not found" });
+
+		// cascade will handle related data
+		await seller.destroy();
+
+		return res.send({ status: true, message: "Seller account deleted successfully" })
 
 	} catch (error) {
 		return res.send({ status: false, message: error.message })

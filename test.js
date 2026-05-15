@@ -1,32 +1,26 @@
+export const timeFormatter = ( defaultTime ) => {
+    const now = new Date();       //get currentTime and date
 
-const calculatePickupTimes = (PickUpTime) => {
-    const now = new Date();
-
-    let estimatedPickupTime = new Date(now);
+    let time = new Date(now);    //copy of current time we will modify this only
 
     // extract hours  (Given time se extract hour)
-    const hoursMatch = PickUpTime.match(/(\d+)\s*hr/);
+    const hoursMatch = defaultTime.match(/(\d+)\s*hr/);     // hoursMatch = ["1 hr", "1"]
     // extract minutes
-    const minutesMatch = PickUpTime.match(/(\d+)\s*min/);
+    const minutesMatch = defaultTime.match(/(\d+)\s*min/);   //minutesMatch = ["20 min", "20"]
 
-    const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+    const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;  //in integer
     const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
 
-    // add hours
-    estimatedPickupTime.setHours(
-        estimatedPickupTime.getHours() + hours
-    );
+  // remove this
 
     // add minutes
-    estimatedPickupTime.setMinutes(
-        estimatedPickupTime.getMinutes() + minutes
+    time.setMinutes(
+        time.getMinutes() + minutes
     );
 
-    return estimatedPickupTime;
+    return time;
 }
 
-const PickUpTime = '15min'
+const time = timeFormatter( '1 hr' );
 
-const calculatedpickUpTime = calculatePickupTimes(PickUpTime);
-
-console.log(calculatedpickUpTime)
+// remove consoles

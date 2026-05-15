@@ -46,8 +46,11 @@ export function up(knex) {
             "rejected"
         ]).defaultTo("pending");
 
-        table.date("pickup_date").nullable();
-        table.string("pickup_start_time").nullable();
+        table.string("preparation_time").nullable();
+
+        table.timestamp("pickup_start_time").nullable();
+
+        table.timestamp("pickup_end_time").nullable();
 
         table.timestamps(true, true);
 
@@ -61,3 +64,10 @@ export function up(knex) {
 export function down(knex) {
     return knex.schema.dropTable("orders")
 }
+
+
+//we will have 
+//order_place_time => it will be current timestamps only
+//preparation_time => it will be time in which order will be packed
+//pickup_start_time => it will be time in which order will be pickUp  by delivery boy
+//pickup_end_time => it will be time pickUp end time

@@ -2007,117 +2007,508 @@
   }
      },
      "/seller/update-order-status/{id}": {
-  "post": {
-    "summary": "Update Order Status",
-    "description": "Seller can approve, reject or complete order and assign pickup time",
+     "post": {
+      "summary": "Update Order Status",
+      "description": "Seller can approve or reject order. If approved, preparation time and pickup timings are generated automatically.",
+      "tags": ["SELLER"],
 
-    "tags": ["SELLER"],
-
-    "security": [
-      {
-        "BearerAuth": []
-      }
-    ],
-
-    "parameters": [
-      {
-        "name": "id",
-        "in": "path",
-        "required": true,
-
-        "schema": {
-          "type": "string",
-          "format": "uuid",
-          "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+      "security": [
+        {
+          "BearerAuth": []
         }
-      }
-    ],
+      ],
 
-    "requestBody": {
-      "required": true,
-
-      "content": {
-        "application/json": {
-
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Order ID",
           "schema": {
-            "type": "object",
-
-            "required": [
-              "order_status"
-            ],
-
-            "properties": {
-
-              "order_status": {
-                "type": "string",
-
-                "enum": [
-                  "approved",
-                  "rejected",
-                  "completed"
-                ],
-
-                "example": "approved"
-              },
-
-              "PickUpTime": {
-                "type": "string",
-                "example": "1 hr 30 mins"
-              }
-
-            }
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
           }
         }
-      }
-    },
+      ],
 
-    "responses": {
-
-      "200": {
-        "description": "Order status updated successfully",
-
+      "requestBody": {
+        "required": true,
         "content": {
           "application/json": {
+            "schema": {
+              "type": "object",
 
-            "example": {
-              "status": true,
-              "message": "Order approved successfully"
+              "required": [
+                "order_status"
+              ],
+
+              "properties": {
+
+                "order_status": {
+                  "type": "string",
+                  "enum": [
+                    "approved",
+                    "rejected"
+                  ],
+                  "example": "approved"
+                },
+
+                "preparation_time": {
+                  "type": "string",
+                  "description": "Required only when order_status is approved",
+                  "example": "1 hr 20 mins"
+                }
+
+              }
             }
-
           }
         }
       },
 
-      "400": {
-        "description": "Validation error",
+      "responses": {
 
-        "content": {
-          "application/json": {
+        "200": {
+          "description": "Order updated successfully",
+          "content": {
+            "application/json": {
+              "examples": {
 
-            "examples": {
+                "approved": {
+                  "value": {
+                    "status": true,
+                    "message": "Order approved successfully",
+                    "data": {
+                      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                      "order_status": "approved",
+                      "preparation_time": "1 hr 20 mins",
+                      "pickup_start_time": "2026-05-14T18:20:00.000Z",
+                      "pickup_end_time": "2026-05-14T18:35:00.000Z"
+                    }
+                  }
+                },
 
-              "invalidStatus": {
-                "value": {
-                  "status": false,
-                  "message": "Invalid order status"
+                "rejected": {
+                  "value": {
+                    "status": true,
+                    "message": "Order Rejected successfully"
+                  }
                 }
-              },
 
-              "pickupRequired": {
-                "value": {
-                  "status": false,
-                  "message": "PickUpTime is required"
-                }
               }
+            }
+          }
+        },
 
+        "400": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "examples": {
+
+                "invalidStatus": {
+                  "value": {
+                    "status": false,
+                    "message": "Invalid order status"
+                  }
+                },
+
+                "preparationRequired": {
+                  "value": {
+                    "status": false,
+                    "message": "preparation_time is required"
+                  }
+                },
+
+                "shopNotFound": {
+                  "value": {
+                    "status": false,
+                    "message": "Shop not found"
+                  }
+                },
+
+                "orderNotFound": {
+                  "value": {
+                    "status": false,
+                    "message": "Order not found"
+                  }
+                }
+
+              }
+            }
+          }
+        },
+
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
             }
           }
         }
-      }
 
+      }
     }
-  }
      },
+     "/seller/orders-list": {
+    "get": {
+      "summary": "Orders List",
+      "description": "Fetch all seller shop orders with products, varieties and pickup timer",
+      "tags": ["SELLER"],
+
+      "security": [
+        {
+          "BearerAuth": []
+        }
+      ],
+
+      "responses": {
+
+        "200": {
+          "description": "Orders fetched successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Orders fetched successfully",
+                "data": [
+                  {
+                    "id": "4f8fd2c3-7b83-4f5e-b11c-9dc56fcb3a12",
+
+                    "total_amount": 250,
+
+                    "total_qty": 15,
+
+                    "order_status": "approved",
+
+                    "pickup_timer": "00:59:00",
+
+                    "orderItems": [
+                      {
+                        "id": "92fbd42a-1234-4fa2-b1de-65d3db4d1234",
+
+                        "qty": 2,
+
+                        "product": {
+                          "id": "product-id",
+
+                          "price": 20,
+
+                          "unit": "Per kg",
+
+                          "variety": {
+                            "id": "variety-id",
+
+                            "name": "Alphonso",
+
+                            "icon": "uploads/variety/alphonso.png"
+                          }
+                        }
+                      },
+
+                      {
+                        "id": "92fbd42a-5678-4fa2-b1de-65d3db4d5678",
+
+                        "qty": 1,
+
+                        "product": {
+                          "id": "product-id",
+
+                          "price": 15,
+
+                          "unit": "Per kg",
+
+                          "variety": {
+                            "id": "variety-id",
+
+                            "name": "Cavendish",
+
+                            "icon": "uploads/variety/cavendish.png"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+
+        "400": {
+          "description": "Shop not found",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Shop not found"
+              }
+            }
+          }
+        },
+
+        "401": {
+          "description": "Unauthorized",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Invalid token"
+              }
+            }
+          }
+        },
+
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+
+      }
+    }
+     },
+
+     "/seller/update-profile": {
+    "post": {
+      "summary": "Update Seller Profile",
+      "description": "Seller can update profile image, first name, last name and email. Email must be unique.",
+      "tags": ["SELLER"],
+
+      "security": [
+        {
+          "BearerAuth": []
+        }
+      ],
+
+      "requestBody": {
+        "required": false,
+        "content": {
+
+          "multipart/form-data": {
+
+            "schema": {
+              "type": "object",
+
+              "properties": {
+
+                "profile_image": {
+                  "type": "string",
+                  "format": "binary"
+                },
+
+                "first_name": {
+                  "type": "string",
+                  "example": "Ritesh"
+                },
+
+                "last_name": {
+                  "type": "string",
+                  "example": "Kumar"
+                },
+
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "example": "ritesh@gmail.com"
+                }
+
+              }
+            }
+          }
+        }
+      },
+
+      "responses": {
+
+        "200": {
+          "description": "Profile updated successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Profile updated successfully",
+                "data": {
+                  "id": "bcb997ae-81af-439b-a52c-8c9e3b408e33",
+                  "first_name": "Ritesh",
+                  "last_name": "Kumar",
+                  "email": "ritesh@gmail.com",
+                  "image": "uploads/seller/profile-12345.png"
+                }
+              }
+            }
+          }
+        },
+
+        "400": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "examples": {
+
+                "sellerNotFound": {
+                  "value": {
+                    "status": false,
+                    "message": "Seller not found"
+                  }
+                },
+
+                "emailAlreadyExists": {
+                  "value": {
+                    "status": false,
+                    "message": "Email already exists"
+                  }
+                }
+
+              }
+            }
+          }
+        },
+
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+
+      }
+    }
+     },
+     "/seller/logout": {
+     "get": {
+      "summary": "Logout Seller",
+      "description": "Logout authenticated seller account",
+      "tags": ["SELLER"],
+
+      "security": [
+        {
+          "BearerAuth": []
+        }
+      ],
+
+      "responses": {
+
+        "200": {
+          "description": "Logout successful",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Seller logout successful"
+              }
+            }
+          }
+        },
+
+        "401": {
+          "description": "Unauthorized",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Invalid token"
+              }
+            }
+          }
+        },
+
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+
+      }
+    }
+     },
+     "/seller/delete-account": {
+    "post": {
+      "summary": "Delete Seller Account",
+      "description": "Delete authenticated seller account permanently. Related data will also be deleted using cascade delete.",
+      "tags": ["SELLER"],
+
+      "security": [
+        {
+          "BearerAuth": []
+        }
+      ],
+
+      "responses": {
+
+        "200": {
+          "description": "Seller account deleted successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Seller account deleted successfully"
+              }
+            }
+          }
+        },
+
+        "400": {
+          "description": "Seller not found",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Seller not found"
+              }
+            }
+          }
+        },
+
+        "401": {
+          "description": "Unauthorized",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Invalid token"
+              }
+            }
+          }
+        },
+
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+
+      }
+    }
+     },
+
 
 
      "/customer/home": {

@@ -13,6 +13,11 @@ const Product = (sequelize) => {
 
       seller_id: {
         type: DataTypes.UUID,
+        allowNull: true,
+      },
+
+      shop_id: {
+        type: DataTypes.UUID,
         allowNull: false,
       },
 

@@ -67,16 +67,25 @@ const Order = (sequelize) => {
         defaultValue: "pending",
       },
 
-      pickup_date: {
-        type: DataTypes.DATEONLY,
-        allowNull: true,
-      },
-
-      pickup_start_time: {
+      // time required to prepare order (in minutes)
+      preparation_time: {
         type: DataTypes.STRING,
         allowNull: true,
       },
 
+      // time when delivery boy can start pickup
+      pickup_start_time: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+
+      // pickup window end time
+      pickup_end_time: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+
+      // order placed time
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,
@@ -114,12 +123,12 @@ const Order = (sequelize) => {
       onDelete: "CASCADE",
     });
 
-    //order hasmany products listed in orderIteams
+    // order has many products
     OrderModel.hasMany(models.OrderItem, {
       foreignKey: "order_id",
       as: "orderItems",
       onDelete: "CASCADE",
-    })
+    });
 
   };
 
