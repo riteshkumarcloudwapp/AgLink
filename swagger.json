@@ -3257,6 +3257,418 @@
       }
     }
   }
+     },
+     "/customer/my-orders": {
+     "get": {
+    "summary": "My Orders List",
+    "description": "Fetch customer orders list",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Orders fetched successfully",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "My orders fetched successfully",
+              "data": [
+                {
+                  "id": "89f4d6a3-77fd-4b62-b5cf-92f2f8b7f1aa",
+                  "total_amount": 70,
+                  "order_status": "approved",
+                  "pickup_time": "1 Hr 0 Min",
+
+                  "shop": {
+                    "id": "1c4f8e4f-8df2-4d8f-9d77-5bc4fa5c3f12",
+                    "shop_name": "Fruits Shop",
+                    "shop_image": "assets/shop/shop.png",
+                    "address": "Delhi",
+                    "latitude": "28.7041",
+                    "longitude": "77.1025"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/view-order/{id}": {
+     "get": {
+    "summary": "View Order Details",
+    "description": "Fetch single order details",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+
+        "example": "89f4d6a3-77fd-4b62-b5cf-92f2f8b7f1aa"
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Order details fetched successfully",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Order details fetched successfully",
+
+              "data": {
+
+                "id": "89f4d6a3-77fd-4b62-b5cf-92f2f8b7f1aa",
+
+                "total_amount": 70,
+
+                "order_status": "approved",
+
+                "shop": {
+                  "id": "1c4f8e4f-8df2-4d8f-9d77-5bc4fa5c3f12",
+                  "shop_name": "Fruits Shop",
+                  "shop_image": "assets/shop/shop.png",
+                  "address": "Delhi",
+                  "phone_number": "9876543210"
+                },
+
+                "orderItems": [
+                  {
+                    "id": "8d7a2a77-1c11-42ea-95c0-6ffac7db0c11",
+
+                    "qty": 2,
+
+                    "price": 20,
+
+                    "sub_total": 40,
+
+                    "product": {
+
+                      "id": "7d9c4d8d-77a4-4d66-bc9d-3c94a0d4a321",
+
+                      "price": 20,
+
+                      "unit": "kg",
+
+                      "variety": {
+                        "id": "3f7a8d9a-bf77-4b8d-91f4-8e1c0b7e1c11",
+                        "name": "Alphonso",
+                        "image": "assets/variety/mango.png"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Order not found",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order not found"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/update-profile": {
+     "post": {
+    "summary": "Update Customer Profile",
+    "description": "Update customer profile details such as first name, last name, email and profile image",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": false,
+
+      "content": {
+        "multipart/form-data": {
+          "schema": {
+            "type": "object",
+
+            "properties": {
+
+              "first_name": {
+                "type": "string",
+                "example": "Ritesh"
+              },
+
+              "last_name": {
+                "type": "string",
+                "example": "Kumar"
+              },
+
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "ritesh@mail.com"
+              },
+
+              "profile_image": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Profile updated successfully",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Profile updated successfully",
+              "data": {
+                "id": "2e71e125-123d-4543-bbf7-94590900e183",
+                "first_name": "Ritesh",
+                "last_name": "Kumar",
+                "email": "ritesh@mail.com",
+                "profile_image": "assets/customer/profile-1723456789.png",
+                "role": "customer"
+              }
+            }
+          }
+        }
+       },
+
+      "400": {
+        "description": "Validation or business logic error",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "customerNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Customer not found"
+                }
+              },
+
+              "emailExists": {
+                "value": {
+                  "status": false,
+                  "message": "Email already exists"
+                }
+              }
+            }
+          }
+        }
+      },
+ 
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/logout": {
+     "post": {
+    "summary": "Logout Customer",
+    "description": "Logout authenticated customer from the application",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Customer logout successful",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Customer logout successful"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Unauthorized access"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/delete-account": {
+     "post": {
+     "summary": "Delete Customer Account",
+     "description": "Delete authenticated customer account permanently",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Customer account deleted successfully",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Customer account deleted successfully"
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Customer not found",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Customer not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Unauthorized access"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
      }
  
 

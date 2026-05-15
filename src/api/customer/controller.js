@@ -428,3 +428,293 @@ export const confirmPayment = async (req, res) => {
     }
 };
 
+/**
+ * @method GET
+ * @description Customer My Orders List
+ */
+export const myOrdersList = async (req, res) => {
+    try {
+
+        const customer_id = req.customer.id;
+
+        // fetch orders
+        const orders = await models.Order.findAll({
+
+            where: { customer_id },
+
+            attributes: [
+                "id",
+                "total_amount",
+                "order_status",
+                "pickup_start_time",
+                "pickup_end_time",
+                "created_at"
+            ],
+
+            include: [
+
+                {
+                    model: models.Shop,
+                    as: "shop",
+
+                    attributes: [
+                        "id",
+                        "shop_name",
+                        "image",
+                        "address",
+                        "latitude",
+                        "longitude"
+                    ]
+                }
+
+            ],
+
+            order: [
+                ["created_at", "DESC"]
+            ]
+
+        });
+
+        // format response
+        const formattedOrders = orders.map(order => {
+
+            let pickup_time = null;
+
+            if (order.pickup_start_time) {
+
+                const start = new Date(order.pickup_start_time);
+
+                const now = new Date();
+
+                const diff = start - now;
+
+                if (diff > 0) {
+
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+
+                    const minutes = Math.floor(
+                        (diff % (1000 * 60 * 60)) / (1000 * 60)
+                    );
+
+                    pickup_time = `${hours} Hr ${minutes} Min`;
+                }
+            }
+
+            return {
+
+                id: order.id,
+
+                total_amount: order.total_amount,
+
+                order_status: order.order_status,
+
+                pickup_time,
+
+                shop: order.shop
+            };
+
+        });
+
+        return res.send({
+            status: true,
+            message: "My orders fetched successfully",
+            data: formattedOrders
+        });
+
+    } catch (error) {
+
+        return res.send({
+            status: false,
+            message: error.message
+        });
+
+    }
+};
+
+/**
+ * @method GET
+ * @description View Order Details
+ */
+export const viewOrderDetails = async (req, res) => {
+    try {
+
+        const customer_id = req.customer.id;
+
+        const order_id = req.params.id;
+
+        // check order
+        const order = await models.Order.findOne({
+
+            where: {
+                id: order_id,
+                customer_id
+            },
+
+            attributes: [
+                "id",
+                "total_amount",
+                "order_status",
+                "pickup_start_time",
+                "pickup_end_time"
+            ],
+
+            include: [
+
+                {
+                    model: models.Shop,
+                    as: "shop",
+
+                    attributes: [
+                        "id",
+                        "shop_name",
+                        "image",
+                        "address",
+                        "phone"
+                    ]
+                },
+
+                {
+                    model: models.OrderItem,
+                    as: "orderItems",
+
+                    attributes: [
+                        "id",
+                        "qty",
+                        "price",
+                        "sub_total"
+                    ],
+
+                    include: [
+
+                        {
+                            model: models.Product,
+                            as: "product",
+
+                            attributes: [
+                                "id",
+                                "price",
+                                "unit"
+                            ],
+
+                            include: [
+
+                                {
+                                    model: models.Variety,
+                                    as: "variety",
+
+                                    attributes: [
+                                        "id",
+                                        "name",
+                                        "image"
+                                    ]
+                                }
+
+                            ]
+                        }
+
+                    ]
+                }
+
+            ]
+
+        });
+
+        if (!order) {
+            return res.send({
+                status: false,
+                message: "Order not found"
+            });
+        }
+
+        return res.send({
+            status: true,
+            message: "Order details fetched successfully",
+            data: order
+        });
+
+    } catch (error) {
+
+        return res.send({
+            status: false,
+            message: error.message
+        });
+
+    }
+};
+
+/**
+ * @method POST
+ * @description update customer profile
+ */
+export const updateCustomerProfile = async (req, res) => {
+    try {
+        const customer_id = req.customer.id;
+        const { first_name, last_name, email } = req.body;
+
+        const customer = await models.User.findByPk(customer_id);
+        if (!customer) {
+            return res.send({ status: false, message: "Customer not found" });
+        }
+
+        // check email uniqueness
+        if (email && email !== customer.email) {
+
+            const existingCustomer = await models.User.findOne({
+                where: { email }
+            });
+
+            if (existingCustomer) return res.send({ status: false, message: "Email already exists" });
+        }
+
+        let imagePath = null;
+        if (req.file) {
+            imagePath = req.file?.path;
+        }
+
+        await customer.update({
+            profile_image: imagePath || customer.profile_image,
+            first_name: (first_name === "" || first_name === null) ? customer.first_name : first_name,
+            last_name: (last_name === "" || last_name === null) ? customer.last_name : last_name,
+            email: (email === "" || email === null) ? customer.email : email
+        });
+
+        return res.send({ status: true, message: "Profile updated successfully", data: customer });
+
+    } catch (error) {
+        return res.send({ status: false, message: error.message })
+    }
+}
+
+/**
+ * @method GET 
+ * @description logout customer
+ */
+export const logout = async (req, res) => {
+    try {
+        return res.send({ status: true, message: "Seller logout successful" });
+    } catch (error) {
+        return res.send({ status: false, message: error.message })
+    }
+}
+
+/**
+ * @method POST
+ * @description Delete customer account
+ */
+export const deleteAccount = async (req, res) => {
+    try {
+        const customerId = req.customer.id;
+
+        const customer = await models.User.findByPk(customerId);
+        if (!customer) return res.send({ status: false, message: "Customer not found" });
+
+        // cascade will handle related data
+        await customer.destroy();
+
+        return res.send({ status: true, message: "Customer account deleted successfully" })
+
+    } catch (error) {
+        return res.send({ status: false, message: error.message })
+    }
+}
+

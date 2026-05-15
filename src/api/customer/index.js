@@ -8,7 +8,12 @@ import {
    addToCart, 
    updateCartQty,
    placedOrder,
-   confirmPayment
+   confirmPayment,
+   myOrdersList,
+   viewOrderDetails,
+   updateCustomerProfile,
+   logout,
+   deleteAccount
  } from "./controller.js";
 import Joi from "joi";
 import createMulter from "../../utils/multer.js"
@@ -17,6 +22,7 @@ import { authenticateToken } from "../../common/middleware/authenticateToken.js"
 const router = express.Router();
 
 //file
+const customerImage = createMulter("customer")
 
 router.get(
    '/home',
@@ -86,6 +92,44 @@ router.post(
       })
    ),
    confirmPayment
+);
+
+router.get(
+   "/my-orders",
+   authenticateToken,
+   myOrdersList
+);
+
+router.get(
+   "/view-order/:id",
+   authenticateToken,
+   viewOrderDetails
+);
+
+router.post(
+   "/update-profile",
+   authenticateToken,
+   customerImage.single("profile_image"),
+   validate(
+      Joi.object({
+         first_name: Joi.string().max(100).optional().allow("", null),
+         last_name: Joi.string().max(100).optional().allow("", null),
+         email: Joi.string().email().optional().allow("", null)
+      }).unknown(true)
+   ),
+   updateCustomerProfile
+);
+
+router.post(
+   "/logout",
+   authenticateToken,
+   logout
+);
+
+router.post(
+   "/delete-account",
+   authenticateToken,
+   deleteAccount
 );
 
 export default router;
