@@ -243,12 +243,7 @@ export const updateCartQty = async (req, res) => {
 
         const { action } = req.body;
 
-        const cartItem = await models.CartItem.findByPk({
-            where: {
-                id: cart.id,
-                customer_id
-            },
-
+        const cartItem = await models.CartItem.findByPk(cart_id, {
             include: [
                 {
                     model: models.Product,
@@ -281,7 +276,7 @@ export const updateCartQty = async (req, res) => {
         if (action === "decrease") {
 
             // remove cart if qty becomes 0
-            if (cartItem.qty <= 1) {
+            if (cartItem.qty < 1) {
 
                 await cartItem.destroy();
 
@@ -355,17 +350,15 @@ export const placedOrder = async (req, res) => {
                 payment_method
             });
 
-            //create order Iteams   //cartIteams is an array
-            for (const item of cartIteams) {
+            const orderItemsData = cartIteams.map(item => ({
+                order_id: order.id,
+                product_id: item.product_id,
+                qty: item.qty,
+                price: item.product.price,
+                sub_total: item.qty * item.product.price
+            }));
 
-                await models.OrderItem.create({
-                    order_id: order.id,
-                    product_id: item.product_id,
-                    qty: item.qty,
-                    price: item.product.price,
-                    sub_total: item.qty * item.product.price
-                });
-            }
+            await models.OrderItem.bulkCreate(orderItemsData);
 
             //empty the cart
             await models.CartItem.destroy({

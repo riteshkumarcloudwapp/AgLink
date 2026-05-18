@@ -21,6 +21,11 @@ const Order = (sequelize) => {
         allowNull: false,
       },
 
+      delivery_boy_id: {
+        type: DataTypes.UUID,
+        allowNull: true,
+      },
+
       total_amount: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
@@ -67,7 +72,7 @@ const Order = (sequelize) => {
         defaultValue: "pending",
       },
 
-      // time required to prepare order (in minutes)
+      // time required to prepare order 
       preparation_time: {
         type: DataTypes.STRING,
         allowNull: true,
@@ -83,6 +88,21 @@ const Order = (sequelize) => {
       pickup_end_time: {
         type: DataTypes.DATE,
         allowNull: true,
+      },
+
+      delivery_otp: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      delivery_otp_expiry: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      otp_verified: {
+        type: DataTypes.STRING,
+        defaultValue: '0',
       },
 
       // order placed time
@@ -127,6 +147,13 @@ const Order = (sequelize) => {
     OrderModel.hasMany(models.OrderItem, {
       foreignKey: "order_id",
       as: "orderItems",
+      onDelete: "CASCADE",
+    });
+
+    // order belongs to delivery boy
+    OrderModel.belongsTo(models.DeliveryBoy, {
+      foreignKey: "delivery_boy_id",
+      as: "deliveryBoy",
       onDelete: "CASCADE",
     });
 

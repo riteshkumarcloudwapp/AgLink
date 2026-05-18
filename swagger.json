@@ -2154,6 +2154,314 @@
       }
     }
      },
+     "/seller/nearest-delivery-boys": {
+     "get": {
+    "summary": "Get nearest available delivery boys",
+    "description": "Fetch nearest available delivery boys based on seller shop latitude and longitude using Haversine formula.",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Nearest delivery boys fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Nearest delivery boys fetched successfully",
+              "data": [
+                {
+                  "id": 1,
+                  "name": "Rahul Sharma",
+                  "phone": "9876543210",
+                  "latitude": 23.0225,
+                  "longitude": 72.5714,
+                  "distance_in_km": "1.25"
+                },
+                {
+                  "id": 2,
+                  "name": "Amit Patel",
+                  "phone": "9999999999",
+                  "latitude": 23.0325,
+                  "longitude": 72.5814,
+                  "distance_in_km": "2.80"
+                }
+              ]
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Shop location not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Shop location not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "404": {
+        "description": "Shop not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Shop not found"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/seller/assign-delivery-boy/{id}": {
+     "post": {
+    "summary": "Assign delivery boy to order",
+    "description": "Seller assigns an available delivery boy to an approved order and generates delivery OTP.",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Order ID"
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": [
+              "delivery_boy_id"
+            ],
+            "properties": {
+              "delivery_boy_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "550e8400-e29b-41d4-a716-446655440000"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Delivery boy assigned successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Delivery boy assigned successfully",
+              "data": {
+                "id": "d290f1ee-6c54-4b01-90e6-d701748f0851",
+                "delivery_boy_id": "550e8400-e29b-41d4-a716-446655440000",
+                "order_status": "packed",
+                "delivery_otp": 4821
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Order is not approved yet",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order is not approved yet"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "404": {
+        "description": "Order or delivery boy not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Delivery boy not found"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/seller/out-for-delivery/{id}": {
+     "post": {
+    "summary": "Mark order as out for delivery",
+    "description": "Seller marks packed order as out for delivery after handing over the order to delivery boy.",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Order ID"
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Order marked as out for delivery successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Order marked as out for delivery successfully",
+              "data": {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "order_status": "out_for_delivery",
+                "pickup_start_time": null,
+                "pickup_end_time": null
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Invalid order state",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order is not packed yet"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "404": {
+        "description": "Order or shop not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order not found"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
      "/seller/orders-list": {
     "get": {
       "summary": "Orders List",
@@ -2278,7 +2586,6 @@
       }
     }
      },
-
      "/seller/update-profile": {
     "post": {
       "summary": "Update Seller Profile",
@@ -3669,8 +3976,182 @@
       }
     }
   }
-     }
+     },
  
+
+     "/delivery-boy/assigned-orders": {
+     "get": {
+    "summary": "Get assigned orders for delivery boy",
+    "description": "Fetch all orders assigned to authenticated delivery boy including customer details and ordered products.",
+    "tags": ["DELIVERY BOY"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Assigned orders fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "data": [
+                {
+                  "id": "550e8400-e29b-41d4-a716-446655440000",
+                  "order_status": "out_for_delivery",
+                  "payment_method": "cod",
+                  "total_amount": 450,
+                  "delivery_address": "Ahmedabad, Gujarat",
+
+                  "customer": {
+                    "id": "c1d2e3f4-g5h6-7890-abcd-123456789000",
+                    "name": "Ritesh Kumar",
+                    "phone": "9876543210"
+                  },
+
+                  "orderItems": [
+                    {
+                      "id": "o123",
+                      "qty": 2,
+                      "price": 150,
+                      "sub_total": 300,
+
+                      "product": {
+                        "id": "p123",
+                        "name": "Pizza",
+                        "image": "uploads/products/pizza.png"
+                      }
+                    },
+
+                    {
+                      "id": "o124",
+                      "qty": 1,
+                      "price": 150,
+                      "sub_total": 150,
+
+                      "product": {
+                        "id": "p124",
+                        "name": "Burger",
+                        "image": "uploads/products/burger.png"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/accept-order/{id}": {
+     "post": {
+    "summary": "Accept assigned order",
+    "description": "Delivery boy accepts assigned order and updates order status to assigned.",
+    "tags": ["DELIVERY BOY"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Order ID"
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Order accepted successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Order accepted successfully"
+            }
+          }
+        }
+      },
+
+      "404": {
+        "description": "Order not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     }
 
 
     },

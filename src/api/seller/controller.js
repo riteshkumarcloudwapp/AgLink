@@ -1,6 +1,6 @@
 import models from "../../models/index.js";
 import { Op } from "sequelize";
-import { timeFormatter } from "./service.js"
+import { timeFormatter, generateOtp, generateTime } from "./service.js"
 
 /**
  * @method POST
@@ -408,6 +408,240 @@ export const updateOrderStatus = async (req, res) => {
 		return res.send({ status: false, message: error.message })
 	}
 }
+
+/**
+ * @method GET
+ * @description Get nearest available delivery boys
+ */
+
+export const getNearestDeliveryBoys = async (req, res) => {
+  try {
+
+    const seller_id = req.seller.id;
+
+    // CHECK SHOP
+    const shop = await models.Shop.findOne({
+      where: { seller_id }
+    });
+
+    if (!shop) return res.send({ status: false, message: "Shop not found"});
+
+    // SHOP LOCATION REQUIRED
+    if (!shop.latitude || !shop.longitude) return res.send({ status: false, message: "Shop location not found" });
+
+    // GET AVAILABLE DELIVERY BOYS
+    const deliveryBoys = await models.DeliveryBoy.findAll({
+      where: {
+        status: "available"
+      }
+    });
+
+    // HAVERSINE FUNCTION
+    const calculateDistance = (
+      lat1,
+      lon1,
+      lat2,
+      lon2
+    ) => {
+
+      const toRad = (value) => {
+        return (value * Math.PI) / 180;
+      };
+
+      const R = 6371; // KM
+
+      const dLat = toRad(lat2 - lat1);
+
+      const dLon = toRad(lon2 - lon1);
+
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+
+        Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+      const c =
+        2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      return R * c;
+    };
+
+    // ADD DISTANCE
+    const nearestDeliveryBoys = deliveryBoys.map((boy) => {
+
+      const distance = calculateDistance(
+        shop.latitude,
+        shop.longitude,
+        boy.latitude,
+        boy.longitude
+      );
+
+      return {
+        id: boy.id,
+        name: boy.name,
+        phone: boy.phone,
+        latitude: boy.latitude,
+        longitude: boy.longitude,
+        distance_in_km: distance.toFixed(2)
+      };
+    });
+
+    // SORT BY DISTANCE
+    nearestDeliveryBoys.sort(
+      (a, b) => a.distance_in_km - b.distance_in_km
+    );
+
+    return res.send({
+      status: true,
+      message: "Nearest delivery boys fetched successfully",
+      data: nearestDeliveryBoys
+    });
+
+  } catch (error) {
+    return res.send({ status: false, message: error.message});
+  }
+};
+
+/**
+ * @method POST
+ * @description Assign delivery boy to order
+ */
+
+export const assignDeliveryBoy = async (req, res) => {
+  try {
+
+    const seller_id = req.seller.id;
+
+    const order_id = req.params.id;
+
+    const { delivery_boy_id } = req.body;
+
+    // CHECK SHOP
+    const shop = await models.Shop.findOne({
+      where: { seller_id }
+    });
+
+    if (!shop) return res.send({ status: false, message: "Shop not found"});
+
+    // CHECK ORDER
+    const order = await models.Order.findOne({
+      where: {
+        id: order_id,
+        shop_id: shop.id
+      }
+    });
+
+    if (!order) { return res.send({ status: false, message: "Order not found"});}
+
+    // CHECK ORDER APPROVED
+    if (order.order_status !== "approved") {
+      return res.send({ status: false, message: "Order is not approved yet"});
+    }
+
+    // CHECK DELIVERY BOY
+    const deliveryBoy = await models.DeliveryBoy.findByPk(
+      delivery_boy_id
+    );
+
+    if (!deliveryBoy) {
+      return res.send({ status: false, message: "Delivery boy not found"});
+    }
+
+    // GENERATE OTP
+    const otp = generateOtp();
+
+    // ASSIGN DELIVERY BOY
+	await deliveryBoy.update({
+	  status : "unavailable"
+	});
+
+    await order.update({
+      delivery_boy_id,
+	  preparation_time : null,
+      order_status: "packed",
+      delivery_otp: otp,
+	  delivery_otp_expiry: generateTime()
+    });
+
+    return res.send({
+      status: true,
+      message: "Delivery boy assigned successfully",
+      data: order
+    });
+
+  } catch (error) {
+    return res.send({ status: false, message: error.message});
+  }
+};
+
+/**
+ * @method POST
+ * @description Mark order as out for delivery
+ */
+
+export const markOutForDelivery = async (req, res) => {
+  try {
+
+    const seller_id = req.seller.id;
+
+    const order_id = req.params.id;
+
+    // CHECK SHOP
+    const shop = await models.Shop.findOne({
+      where: { seller_id }
+    });
+
+    if (!shop) return res.send({ status: false, message: "Shop not found" });
+
+    // CHECK ORDER
+    const order = await models.Order.findOne({
+      where: {
+        id: order_id,
+        shop_id: shop.id
+      }
+    });
+
+    if (!order) return res.send({ status: false, message: "Order not found" });
+
+    // CHECK DELIVERY BOY ASSIGNED
+    if (!order.delivery_boy_id) {
+      return res.send({ status: false, message: "Delivery boy not assigned"});
+    }
+
+    // CHECK CURRENT STATUS
+    if (order.order_status !== "packed") {
+      return res.send({
+        status: false,
+        message: "Order is not packed yet"
+      });
+    }
+
+    // UPDATE STATUS
+    await order.update({
+      order_status: "out_for_delivery",
+      pickup_start_time: null,
+      pickup_end_time: null
+    });
+
+    return res.send({
+      status: true,
+      message: "Order marked as out for delivery successfully",
+      data: order
+    });
+
+  } catch (error) {
+
+    return res.send({
+      status: false,
+      message: error.message
+    });
+
+  }
+};
+
 
 /**
  * @method GET

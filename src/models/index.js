@@ -10,6 +10,7 @@ import Shop from "./Shop.js";
 import CartItem from "./CartItem.js";
 import Order from "./Order.js";
 import OrderItem from "./OrderItem.js"; 
+import DeliveryBoy from "./DeliveryBoy.js";
 
 const sequelize = new Sequelize(dbConfig.url, {
   ...dbConfig,
@@ -24,7 +25,8 @@ const models = {
   Shop             : Shop(sequelize, Sequelize.DataTypes),
   CartItem         : CartItem(sequelize, Sequelize.DataTypes),
   Order            : Order(sequelize, Sequelize.DataTypes),
-  OrderItem        : OrderItem(sequelize, Sequelize.DataTypes)
+  OrderItem        : OrderItem(sequelize, Sequelize.DataTypes),
+  DeliveryBoy      : DeliveryBoy(sequelize, Sequelize.DataTypes)
 
 };
 

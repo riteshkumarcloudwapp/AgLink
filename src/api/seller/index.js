@@ -9,6 +9,9 @@ import {
    ordersList,
    viewOrderDetails,
    updateOrderStatus,
+   getNearestDeliveryBoys,
+   assignDeliveryBoy,
+   markOutForDelivery,
    updateSellerProfile,
    logout,
    deleteAccount
@@ -105,6 +108,29 @@ router.post(
       }).unknown(true)
    ),
    updateOrderStatus
+);
+
+router.get(
+   "/nearest-delivery-boys",
+   authenticateToken,
+   getNearestDeliveryBoys
+);
+
+router.post(
+   "/assign-delivery-boy/:id",
+   authenticateToken,
+   validate(
+      Joi.object({
+         delivery_boy_id: Joi.string().uuid().required()
+      }).unknown(true)
+   ),
+   assignDeliveryBoy
+);
+
+router.post(
+   "/out-for-delivery/:id",
+   authenticateToken,
+   markOutForDelivery
 );
 
 router.post(

@@ -20,6 +20,13 @@ export function up(knex) {
             .inTable("shops")
             .onDelete("CASCADE")
 
+        table
+            .uuid("delivery_boy_id")
+            .nullable()
+            .references("id")
+            .inTable("delivery_boys")
+            .onDelete("CASCADE")
+
         table.decimal("total_amount", 10, 2).notNullable();
         table.string("delivery_address").notNullable();
         table.decimal("latitude", 10, 8).nullable();
@@ -51,6 +58,12 @@ export function up(knex) {
         table.timestamp("pickup_start_time").nullable();
 
         table.timestamp("pickup_end_time").nullable();
+
+        table.string("delivery_otp").nullable();
+
+        table.string("delivery_otp_expiry").nullable();
+
+        table.string("otp_verified").defaultTo('0');
 
         table.timestamps(true, true);
 
