@@ -14,7 +14,7 @@ export async function seed(knex) {
   await knex("delivery_boys").insert([
     {
       id: randomUUID(),
-      name: "Rahul Sharma",
+      name: "Omkar Sharma",
       country_code: "+91",
       phone: "9876543210",
       profile_image: "uploads/delivery-boys/rahul.png",

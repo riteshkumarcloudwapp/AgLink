@@ -50,7 +50,9 @@ export function up(knex) {
             "out_for_delivery",
             "delivered",
             "cancelled",
-            "rejected"
+            "rejected",
+            "assigned",
+            "picked_up"
         ]).defaultTo("pending");
 
         table.string("preparation_time").nullable();

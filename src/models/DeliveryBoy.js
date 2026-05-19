@@ -16,6 +16,11 @@ const DeliveryBoy = (sequelize) => {
         allowNull: true,
       },
 
+      email: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
       country_code: {
         type: DataTypes.STRING,
         allowNull: true,
@@ -52,6 +57,16 @@ const DeliveryBoy = (sequelize) => {
       },
 
       vehicle_number: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      otp: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      expiry_time: {
         type: DataTypes.STRING,
         allowNull: true,
       },

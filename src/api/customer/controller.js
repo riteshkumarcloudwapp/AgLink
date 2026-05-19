@@ -379,7 +379,7 @@ export const placedOrder = async (req, res) => {
                     shop_id,
                     delivery_address
                 },
-            });
+            }); 
 
             //create order
             const order = await models.Order.create({

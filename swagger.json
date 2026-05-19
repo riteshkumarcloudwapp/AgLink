@@ -3979,6 +3979,353 @@
      },
  
 
+     "/delivery-boy/signup": {
+      "post": {
+    "summary": "Delivery boy signup",
+    "description": "Register a new delivery boy with profile image and vehicle details.",
+    "tags": ["DELIVERY BOY"],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "multipart/form-data": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "name",
+              "email",
+              "country_code",
+              "phone",
+              "address",
+              "vehicle_name",
+              "vehicle_number",
+              "profile_image"
+            ],
+
+            "properties": {
+
+              "name": {
+                "type": "string",
+                "example": "Rahul Sharma"
+              },
+
+              "email": {
+                "type": "string",
+                "example": "rahul.sharma@example.com"
+              },
+
+              "country_code": {
+                "type": "string",
+                "example": "+91"
+              },
+
+              "phone": {
+                "type": "string",
+                "example": "9876543210"
+              },
+
+              "address": {
+                "type": "string",
+                "example": "Ahmedabad, Gujarat"
+              },
+
+              "vehicle_name": {
+                "type": "string",
+                "example": "Honda Shine"
+              },
+
+              "vehicle_number": {
+                "type": "string",
+                "example": "GJ01AB1234"
+              },
+
+              "profile_image": {
+                "type": "string",
+                "format": "binary"
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Delivery boy registered successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Delivery boy registered successfully"
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation error",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "phone_exists": {
+                "summary": "Phone already registered",
+                "value": {
+                  "status": false,
+                  "message": "Phone number already registered"
+                }
+              },
+
+              "image_required": {
+                "summary": "Profile image required",
+                "value": {
+                  "status": false,
+                  "message": "Profile image is required"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/login": {
+     "post": {
+    "summary": "Delivery boy login",
+    "description": "Login delivery boy using country code and phone number. OTP will be generated and sent for verification.",
+    "tags": ["DELIVERY BOY"],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "email",
+              "latitude",
+              "longitude"
+            ],
+
+            "properties": {
+
+              "email": {
+                "type": "string",
+                "example": "rahul.sharma@example.com"
+              },
+
+              "latitude": {
+                "type": "number",
+                "example": 23.0225
+              },
+
+              "longitude": {
+                "type": "number",
+                "example": 72.5714
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "OTP sent successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Login Otp send successfully",
+              "otp": "458921"
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Delivery boy not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Delivery boy not found"
+            }
+          }
+        }
+      },
+
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "\"phone\" is required"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/verify-otp": {
+     "post": {
+    "summary": "Verify delivery boy OTP",
+    "description": "Verify OTP for delivery boy login and generate JWT authentication token.",
+    "tags": ["DELIVERY BOY"],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "email",
+              "otp"
+            ],
+
+            "properties": {
+              "email": {
+                "type": "string",
+                "example": "rahul.sharma@example.com"
+              },
+              
+              "otp": {
+                "type": "string",
+                "example": "458921"
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "OTP verified successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Login successfully",
+              "token": "jwt_token_here",
+              "data": {
+                "id": "0c5c1e9d-0f8f-4f5a-a7cf-b7d8e9f0d123",
+                "name": "Rahul Sharma",
+                "country_code": "+91",
+                "phone": "9876543210",
+                "profile_image": "uploads/delivery-boy/profile.png",
+                "address": "Ahmedabad, Gujarat",
+                "vehicle_name": "Honda Shine",
+                "vehicle_number": "GJ01AB1234",
+                "status": "available"
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "OTP verification failed",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "delivery_boy_not_found": {
+                "summary": "Delivery boy not found",
+                "value": {
+                  "status": false,
+                  "message": "Delivery boy not found"
+                }
+              },
+
+              "invalid_otp": {
+                "summary": "Invalid OTP",
+                "value": {
+                  "status": false,
+                  "message": "Invalid OTP"
+                }
+              },
+
+              "otp_expired": {
+                "summary": "OTP expired",
+                "value": {
+                  "status": false,
+                  "message": "OTP expired"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "\"otp\" is required"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
      "/delivery-boy/assigned-orders": {
      "get": {
     "summary": "Get assigned orders for delivery boy",
@@ -4132,6 +4479,372 @@
             "example": {
               "status": false,
               "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/pickup-order/{id}": {
+     "post": {
+    "summary": "Pickup assigned order",
+    "description": "Delivery boy picks up the order from the shop and order status changes to picked_up.",
+    "tags": ["DELIVERY BOY"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "b8f5f2f1-2d65-4d88-a6e4-2f6c8f8f1234"
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Order picked successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Order picked successfully"
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Order not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/out-for-delivery/{id}": {
+     "post": {
+    "summary": "Mark order as out for delivery",
+    "description": "Delivery boy marks the picked order as out for delivery.",
+    "tags": ["DELIVERY BOY"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "b8f5f2f1-2d65-4d88-a6e4-2f6c8f8f1234"
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Order marked as out for delivery successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Order is out for delivery"
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Order not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/verify-delivery-otp": {
+     "post": {
+    "summary": "Verify delivery OTP",
+    "description": "Delivery boy verifies the delivery OTP provided by the customer and marks the order as delivered.",
+    "tags": ["DELIVERY BOY"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "order_id",
+              "otp"
+            ],
+
+            "properties": {
+
+              "order_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "b8f5f2f1-2d65-4d88-a6e4-2f6c8f8f1234"
+              },
+
+              "otp": {
+                "type": "string",
+                "example": "4589"
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Order delivered successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Order delivered successfully"
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "OTP verification failed",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "order_not_found": {
+                "summary": "Order not found",
+                "value": {
+                  "status": false,
+                  "message": "Order not found"
+                }
+              },
+
+              "invalid_otp": {
+                "summary": "Invalid OTP",
+                "value": {
+                  "status": false,
+                  "message": "Invalid OTP"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "\"otp\" is required"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/toggle-availability": {
+     "post": {
+    "summary": "Toggle delivery boy availability",
+    "description": "Delivery boy can update their availability status to available or unavailable.",
+    "tags": ["DELIVERY BOY"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "is_available"
+            ],
+
+            "properties": {
+
+              "is_available": {
+                "type": "boolean",
+                "example": true
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Availability updated successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Availability updated"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "\"is_available\" is required"
             }
           }
         }

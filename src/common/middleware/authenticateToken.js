@@ -45,7 +45,7 @@ export const authenticateToken = async(req,res,next) => {
       req.seller = user;
     }
     else{
-       user = await models.User.findByPk(id);
+      user = await models.DeliveryBoy.findByPk(id);
       if(!user){
         return res.send({status: false, message: "Authentication failed. Delivery Boy not authorized."});
       }

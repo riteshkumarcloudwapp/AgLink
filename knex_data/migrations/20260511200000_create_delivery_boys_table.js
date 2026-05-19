@@ -6,6 +6,7 @@ export function up(knex) {
   return knex.schema.createTable("delivery_boys", (table)=>{
     table.uuid("id").primary();
     table.string("name").nullable();
+    table.string("email").nullable();
     table.string("country_code").nullable();
     table.string("phone").nullable();
     table.string("profile_image").nullable();
@@ -14,6 +15,8 @@ export function up(knex) {
     table.decimal("longitude",11,8).nullable();
     table.string("vehicle_name").nullable();
     table.string("vehicle_number").nullable();
+    table.string("otp").defaultTo(null);
+    table.string("expiry_time").defaultTo(null);
     table.enum("status", ["available", "unavailable"]).defaultTo("available");
     table.timestamps(true, true);
   })

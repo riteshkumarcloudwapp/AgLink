@@ -66,7 +66,9 @@ const Order = (sequelize) => {
           "out_for_delivery",
           "delivered",
           "cancelled",
-          "rejected"
+          "rejected",
+          "assigned",
+          "picked_up"
         ),
         allowNull: false,
         defaultValue: "pending",
