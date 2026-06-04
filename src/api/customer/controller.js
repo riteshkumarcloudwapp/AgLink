@@ -1,7 +1,7 @@
 import models from "../../models/index.js"
 import { Op } from "sequelize";
 import Sequelize from "sequelize"
-import stripe from "../../common/config/stripe.js"
+import createPaymentIntent from "../../common/services/stripePaymentIntent.js";
 
 
 /**
@@ -64,7 +64,7 @@ export const home = async (req, res) => {
                 }
             ],
 
-            order: [["rating", "DESC"]]
+            order: [["rating", "DESC"]] 
 
         });
 
@@ -368,37 +368,51 @@ export const placedOrder = async (req, res) => {
             return res.send({ status: true, message: "Order placed successfully", data: order });
         }
 
-        //ONLINE
+        // ONLINE FLOW
         if (payment_method === "online") {
-            // create stripe payment Intent
-            const paymentIntent = await stripe.paymentIntents.create({
-                amount: totalAmount,
-                currency: "usd",
-                metadata: {
-                    customer_id,
-                    shop_id,
-                    delivery_address
-                },
-            }); 
 
-            //create order
+            // create pending order
             const order = await models.Order.create({
-                customer_id: customer_id,
-                shop_id: shop_id,
+                customer_id,
+                shop_id,
                 total_amount: totalAmount,
-                delivery_address: delivery_address,
+                delivery_address,
                 payment_method: "online",
                 payment_status: "pending",
                 order_status: "pending",
             });
 
+            // create payment intent
+            const paymentIntent = await createPaymentIntent({
+
+                amount: totalAmount,
+
+                currency: "inr",
+
+                user: req.customer,
+
+                order_id: order.id,
+
+                type: "order",
+
+                description: `Payment for Order #${order.id}`,
+            });
+
+            // save payment intent id
+            order.payment_intent_id = paymentIntent.id;
+
+            await order.save();
+
             return res.send({
                 status: true,
                 message: "Payment initiated",
-                client_secret: paymentIntent.client_secret,
-                order_id: order.id
-            });
 
+                client_secret: paymentIntent.client_secret,
+
+                payment_intent_id: paymentIntent.id,
+
+                order_id: order.id,
+            });
         }
 
         return res.send({ status: false, message: "Invalid payment method" });
