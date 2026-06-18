@@ -1,0 +1,4881 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "My Express API",
+        "description": "A sample API built with Express",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000"
+        }
+    ],
+    "security": [],
+    "paths": {
+
+    "/user/register": {
+    "post": {
+    "summary": "Register User",
+    "description": "Registers a new user with email and phone number. Sends OTP to email after successful registration.",
+    "tags": ["USER AUTH"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": [
+              "first_name",
+              "last_name",
+              "email",
+              "country_code",
+              "phone_number",
+              "password"
+            ],
+            "properties": {
+              "first_name": {
+                "type": "string",
+                "example": "Ritesh"
+              },
+              "last_name": {
+                "type": "string",
+                "example": "Kumar"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "ritesh@gmail.com"
+              },
+              "country_code": {
+                "type": "string",
+                "example": "+91"
+              },
+              "phone_number": {
+                "type": "string",
+                "example": "9876543210"
+              },
+              "password": {
+                "type": "string",
+                "example": "123456"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OTP sent to registered email",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Otp sent to Registered Email",
+              "data": {
+                "id": "uuid",
+                "first_name": "Ritesh",
+                "last_name": "Kumar",
+                "email": "ritesh@gmail.com",
+                "country_code": "+91",
+                "phone_number": "9876543210",
+                "otp": "123456",
+                "expiry_time": "2026-05-01T10:00:00Z"
+              }
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "User already exists or validation error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Email or Phone_number already Registered"
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+    "/user/verify-otp": {
+    "post": {
+    "summary": "Verify OTP",
+    "description": "Verifies user using OTP and user ID. Marks user as verified if OTP is valid.",
+    "tags": ["USER AUTH"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["otp", "id"],
+            "properties": {
+              "otp": {
+                "type": "string",
+                "example": "123456"
+              },
+              "id": {
+                "type": "string",
+                "example": "uuid"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OTP Verified Successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Verified successfully"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Invalid OTP",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid Otp"
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "OTP Expired",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Otp Expired"
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+    "/user/login": {
+    "post": {
+    "summary": "Login User",
+    "description": "Logs in user using email and password. If user is not verified, OTP will be sent to email.",
+    "tags": ["USER AUTH"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["email", "password"],
+            "properties": {
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "ritesh@gmail.com"
+              },
+              "password": {
+                "type": "string",
+                "example": "123456"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Login Successful",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Login Successful",
+              "Jwt_token": "your_jwt_token_here"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "User not found or incorrect password",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "user not found"
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "Incorrect Password",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Incorrect Password"
+            }
+          }
+        }
+      },
+      "403": {
+        "description": "User not verified - OTP sent",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Otp Send Successfully. Please verify your email before logging in."
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+    "/user/forget-password": {
+    "post": {
+    "summary": "Forget Password",
+    "description": "Sends OTP to user's registered email for password reset.",
+    "tags": ["USER AUTH"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["email"],
+            "properties": {
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "ritesh@gmail.com"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OTP sent successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Otp send Successful"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "User not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "User not found"
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/user/reset-password": {
+     "post": {
+    "summary": "Reset Password",
+    "description": "Resets user password using user ID.",
+    "tags": ["USER AUTH"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["password", "id"],
+            "properties": {
+              "password": {
+                "type": "string",
+                "example": "123456"
+              },
+              "id": {
+                "type": "string",
+                "example": "uuid"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Password reset successful",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Password reset successful"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "User not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "User not found"
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/user/resend-otp": {
+    "post": {
+    "summary": "Resend OTP",
+    "description": "Resends OTP to user's email with rate limiting (60 seconds).",
+    "tags": ["USER AUTH"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "uuid"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OTP resent successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Resend Otp Send"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "User not found or rate limit exceeded",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "User not found"
+            }
+          }
+        }
+      },
+      "429": {
+        "description": "Too many requests (rate limit)",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Please wait 25 seconds before resending."
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/user/role-change": {
+    "post": {
+    "summary": "Change User Role",
+    "description": "Toggle authenticated user role between customer and seller",
+    "tags": ["USER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Role changed successfully",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "changedToSeller": {
+                "value": {
+                  "status": true,
+                  "message": "Role changed to seller"
+                }
+              },
+
+              "changedToCustomer": {
+                "value": {
+                  "status": true,
+                  "message": "Role changed to customer"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "User not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "User not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Authentication failed. No token provided."
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     
+     "/home/add-category": {
+     "post": {
+      "summary": "Add Category",
+      "description": "Create a new category with name and icon image",
+      "tags": ["HOME"],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "type": "object",
+              "required": ["name", "icon"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Fruits"
+                },
+                "icon": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Category added successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Category added successfully"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Category already exists or validation error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Category already exist"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Missing icon file",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Category icon required"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+     },
+     "/home/edit-category/{id}": {
+     "post": {
+      "summary": "Edit Category",
+      "description": "Update category name and/or icon",
+      "tags": ["HOME"],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Category ID",
+          "schema": {
+            "type": "string",
+            "example": "uuid"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": false,
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Vegetables"
+                },
+                "icon": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Category updated successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Category updated successfully"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Category not found or validation error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Category not found"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+     },
+     "/home/get-category": {
+     "get": {
+      "summary": "Get All Categories",
+      "description": "Fetch all categories",
+       "tags": ["HOME"],
+      "responses": {
+        "200": {
+          "description": "Category fetched successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Category fetched successfully",
+                "data": [
+                  {
+                    "id": "uuid",
+                    "name": "Fruits",
+                    "icon": "uploads/category/fruits.png",
+                    "createdAt": "2026-05-05T10:00:00.000Z",
+                    "updatedAt": "2026-05-05T10:00:00.000Z"
+                  }
+                ]
+              }
+             }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+     },
+     "/home/delete-category/{id}": {
+     "post": {
+      "summary": "Delete Category",
+      "description": "Delete a category by ID",
+      "tags": ["HOME"],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Category ID",
+          "schema": {
+            "type": "string",
+            "example": "uuid"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Category deleted successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Category deleted successfully"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Category not found",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Category not found"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+     },
+
+     "/home/add-subCategory": {
+    "post": {
+      "summary": "Add SubCategory",
+      "description": "Create a new subcategory with image upload",
+      "tags": ["HOME"],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "type": "object",
+              "required": ["name", "category_id", "image"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Mobiles"
+                },
+                "category_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "b3c1a6b2-7b2f-4c6e-9f1a-123456789abc"
+                },
+                "image": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "SubCategory added successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "subCategory added successfully"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Validation or input error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Category not found"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+     },
+     "/home/edit-subCategory/{id}": {
+     "post": {
+      "summary": "Edit SubCategory",
+      "description": "Update subcategory name and image",
+      "tags": ["HOME"],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "SubCategory ID",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "b3c1a6b2-7b2f-4c6e-9f1a-123456789abc"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": false,
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Updated Name"
+                },
+                "image": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "SubCategory updated successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "subCategory updated successfully"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "SubCategory not found",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "subCategory not found"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+     },
+     "/home/get-subCategory": {
+     "get": {
+      "summary": "Get All SubCategories",
+      "description": "Fetch all active subcategories",
+      "tags": ["HOME"],
+      "parameters": [
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "description": "Page number",
+          "schema": {
+            "type": "integer",
+            "example": 1
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Number of records per page",
+          "schema": {
+            "type": "integer",
+            "example": 10
+          }
+        },
+        {
+          "name": "search",
+          "in": "query",
+          "required": false,
+          "description": "Search by subcategory name",
+          "schema": {
+            "type": "string",
+            "example": "mobile"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "SubCategory fetched successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "subCategory fetched successfully",
+                "data": [
+                  {
+                    "id": "uuid",
+                    "name": "Mobiles",
+                    "image": "uploads/subcategory/image.png",
+                    "category_id": "uuid",
+                    "status": "active",
+                    "created_at": "2026-05-05T10:00:00.000Z"
+                  }
+                ],
+                "pagination": {
+                  "total": 1,
+                  "page": 1,
+                  "limit": 10,
+                  "totalPages": 1
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Bad Request",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Invalid query params"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+
+     },
+     "/home/delete-subCategory/{id}": {
+      "post": {
+      "summary": "Delete SubCategory",
+      "description": "Delete a subcategory by ID",
+      "tags": ["HOME"],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "SubCategory ID",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "b3c1a6b2-7b2f-4c6e-9f1a-123456789abc"
+          }
+        }
+       ],
+      "responses": {
+        "200": {
+          "description": "SubCategory deleted successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "subCategory deleted successfully"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "SubCategory not found",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "subCategory not found"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+      }
+    }
+     },
+
+     "/home/add-variety": {
+      "post": {
+        "summary": "Add Variety",
+        "description": "Create a new variety with image upload",
+        "tags": ["HOME"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "sub_category_id", "image"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Tomato"
+                  },
+                  "sub_category_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Variety added successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": true,
+                  "message": "variety added successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation or business error",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "missingImage": {
+                    "value": {
+                      "status": false,
+                      "message": "variety image required"
+                    }
+                  },
+                  "duplicate": {
+                    "value": {
+                      "status": false,
+                      "message": "variety already exist"
+                    }
+                  },
+                  "subCategoryNotFound": {
+                    "value": {
+                      "status": false,
+                      "message": "subCategory not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+     },
+     "/home/edit-variety/{id}": {
+     "post": {
+        "summary": "Edit Variety",
+        "description": "Update variety name and/or image",
+        "tags": ["HOME"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Variety ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Updated Tomato"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Variety updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": true,
+                  "message": "variety updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "notFound": {
+                    "value": {
+                      "status": false,
+                      "message": "variety not found"
+                    }
+                  },
+                  "validationError": {
+                    "value": {
+                      "status": false,
+                      "message": "Invalid input"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+     },
+     "/home/get-variety": {
+      "get": {
+        "summary": "Get All Varieties",
+        "description": "Fetch all active varieties ordered by latest created",
+        "tags": ["HOME"],
+        "responses": {
+          "200": {
+            "description": "Varieties fetched successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": true,
+                  "message": "variety fetched successfully",
+                  "data": [
+                    {
+                      "id": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0",
+                      "name": "Tomato",
+                      "image": "uploads/varieties/tomato.png",
+                      "sub_category_id": "a1b2c3d4-5678-9101-1121-314151617181",
+                      "status": "active",
+                      "created_at": "2026-05-06T10:00:00.000Z",
+                      "updated_at": "2026-05-06T10:00:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": false,
+                  "message": "Something went wrong"
+                }
+              }
+            }
+          }
+        }
+      }
+     },
+     "/home/delete-variety/{id}": {
+     "post": {
+        "summary": "Delete Variety",
+        "description": "Delete a variety by ID and remove its image from server",
+        "tags": ["HOME"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Variety ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Variety deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": true,
+                  "message": "variety deleted successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "notFound": {
+                    "value": {
+                      "status": false,
+                      "message": "variety not found"
+                    }
+                  },
+                  "serverError": {
+                    "value": {
+                      "status": false,
+                      "message": "Something went wrong"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+     },
+ 
+
+     "/seller/add-shop": {
+    "post": {
+    "summary": "Shop Registration",
+    "description": "Register a new shop and submit application for verification",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "multipart/form-data": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "shop_name",
+              "shop_keeper_name",
+              "email",
+              "phone",
+              "address",
+              "latitude",
+              "longitude",
+              "image"
+            ],
+
+            "properties": {
+
+              "shop_name": {
+                "type": "string",
+                "example": "Fresh Vegetable Store"
+              },
+
+              "shop_keeper_name": {
+                "type": "string",
+                "example": "Ritesh Kumar"
+              },
+
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "shop@example.com"
+              },
+
+              "phone": {
+                "type": "string",
+                "example": "9876543210"
+              },
+
+              "address": {
+                "type": "string",
+                "example": "Lucknow, Uttar Pradesh"
+              },
+
+              "latitude": {
+                "type": "string",
+                "example": "26.8467"
+              },
+
+              "longitude": {
+                "type": "string",
+                "example": "80.9462"
+              },
+
+              "image": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Shop registration response",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "success": {
+                "value": {
+                  "status": true,
+                  "message": "Application submitted for Verification"
+                }
+              },
+
+              "alreadyExists": {
+                "value": {
+                  "status": false,
+                  "message": "Shop already exist"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation or image error",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "imageRequired": {
+                "value": {
+                  "status": false,
+                  "message": "Image is required"
+                }
+              },
+
+              "validationError": {
+                "value": {
+                  "status": false,
+                  "message": "Invalid input"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Authentication failed. No token provided."
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/seller/add-product": {
+    "post": {
+    "summary": "Add Product",
+    "description": "Create a new product for seller",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "category_id",
+              "sub_category_id",
+              "varieties_id",
+              "price",
+              "stock_qty",
+              "unit"
+            ],
+
+            "properties": {
+
+              "category_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+              },
+
+              "sub_category_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "11dabc5a-7bc2-4338-bd16-53fef1e9b4a0"
+              },
+
+              "varieties_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "22eabc5a-8bc2-4338-bd16-53fef1e9b4a0"
+              },
+
+              "price": {
+                "type": "string",
+                "example": "120.50"
+              },
+
+              "stock_qty": {
+                "type": "string",
+                "example": "50"
+              },
+
+              "unit": {
+                "type": "string",
+                "example": "kg"
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Product added successfully",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "success": {
+                "value": {
+                  "status": true,
+                  "message": "Product added successfully"
+                }
+              },
+
+              "alreadyExist": {
+                "value": {
+                  "status": false,
+                  "message": "Product already exist"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid input"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Authentication failed. No token provided."
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/seller/home": {
+     "get": {
+     "summary": "Seller Home API",
+    "description": "Fetch seller profile data along with categories, subcategories and varieties",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+      "200": {
+        "description": "Home data fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Home data fetched successfully",
+              "data": {
+                "seller": {
+                  "id": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0",
+                  "first_name": "Ritesh",
+                  "last_name": "Kumar",
+                  "profile_image": "uploads/profile/profile.png",
+                  "address": "Lucknow, Uttar Pradesh"
+                },
+
+                "categories": [
+                  {
+                    "id": "1",
+                    "name": "Vegetables",
+                    "status": "active",
+
+                    "subCategories": [
+                      {
+                        "id": "11",
+                        "name": "Leafy Vegetables",
+                        "status": "active",
+
+                        "varieties": [
+                          {
+                            "id": "111",
+                            "name": "Spinach",
+                            "status": "active"
+                          },
+                          {
+                            "id": "112",
+                            "name": "Coriander",
+                            "status": "active"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Seller not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Seller not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Authentication failed. No token provided."
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/seller/stock-update/{id}": {
+     "post": {
+    "summary": "Update Product Stock",
+    "description": "Update product stock quantity or remove product when status is closed",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Product ID",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+        }
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["action"],
+            "properties": {
+
+              "stock_qty": {
+                "type": "string",
+                "example": "20"
+              },
+
+              "action": {
+                "type": "string",
+                "enum": ["add", "remove"],
+                "example": "add"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Stock updated or removed successfully",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "stockUpdated": {
+                "value": {
+                  "status": true,
+                  "message": "Stock updated successfully"
+                }
+              },
+
+              "stockRemoved": {
+                "value": {
+                  "status": true,
+                  "message": "Stock removed successfully"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation or product error",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "productNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Product not found"
+                }
+              },
+
+              "invalidStatus": {
+                "value": {
+                  "status": false,
+                  "message": "Invalid status"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/seller/get-orders": {
+     "get": {
+    "summary": "View Seller Orders",
+    "description": "Fetch all orders received by seller shop",
+
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Orders fetched successfully",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "success": {
+                "value": {
+                  "status": true,
+                  "message": "Orders fetched successfully",
+                  "data": [
+                    {
+                      "id": "c91fd2f5-12c2-4b75-8e18-85f4d7ecf801",
+                      "total_amount": "250",
+                      "payment_method": "cod",
+                      "payment_status": "pending",
+                      "order_status": "pending",
+                      "created_at": "2026-05-13T10:00:00.000Z",
+
+                      "customer": {
+                        "id": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0",
+                        "first_name": "Ritesh",
+                        "last_name": "Kumar",
+                        "profile_image": "uploads/profile.png"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Business Logic Error",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "shopNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Shop not found"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/seller/view-order-details/{id}": {
+     "post": {
+    "summary": "View and Update Order Details",
+    "description": "Fetch order details and update order status",
+
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Order ID",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+        }
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Order details fetched or updated successfully",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "viewOrder": {
+                "value": {
+                  "status": true,
+                  "message": "Order details fetched successfully"
+                }
+              },
+
+              "approveOrder": {
+                "value": {
+                  "status": true,
+                  "message": "Order approved successfully"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Business Logic Error",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "shopNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Shop not found"
+                }
+              },
+
+              "orderNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Order not found"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/seller/update-order-status/{id}": {
+     "post": {
+      "summary": "Update Order Status",
+      "description": "Seller can approve or reject order. If approved, preparation time and pickup timings are generated automatically.",
+      "tags": ["SELLER"],
+
+      "security": [
+        {
+          "BearerAuth": []
+        }
+      ],
+
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Order ID",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        }
+      ],
+
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+
+              "required": [
+                "order_status"
+              ],
+
+              "properties": {
+
+                "order_status": {
+                  "type": "string",
+                  "enum": [
+                    "approved",
+                    "rejected"
+                  ],
+                  "example": "approved"
+                },
+
+                "preparation_time": {
+                  "type": "string",
+                  "description": "Required only when order_status is approved",
+                  "example": "1 hr 20 mins"
+                }
+
+              }
+            }
+          }
+        }
+      },
+
+      "responses": {
+
+        "200": {
+          "description": "Order updated successfully",
+          "content": {
+            "application/json": {
+              "examples": {
+
+                "approved": {
+                  "value": {
+                    "status": true,
+                    "message": "Order approved successfully",
+                    "data": {
+                      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                      "order_status": "approved",
+                      "preparation_time": "1 hr 20 mins",
+                      "pickup_start_time": "2026-05-14T18:20:00.000Z",
+                      "pickup_end_time": "2026-05-14T18:35:00.000Z"
+                    }
+                  }
+                },
+
+                "rejected": {
+                  "value": {
+                    "status": true,
+                    "message": "Order Rejected successfully"
+                  }
+                }
+
+              }
+            }
+          }
+        },
+
+        "400": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "examples": {
+
+                "invalidStatus": {
+                  "value": {
+                    "status": false,
+                    "message": "Invalid order status"
+                  }
+                },
+
+                "preparationRequired": {
+                  "value": {
+                    "status": false,
+                    "message": "preparation_time is required"
+                  }
+                },
+
+                "shopNotFound": {
+                  "value": {
+                    "status": false,
+                    "message": "Shop not found"
+                  }
+                },
+
+                "orderNotFound": {
+                  "value": {
+                    "status": false,
+                    "message": "Order not found"
+                  }
+                }
+
+              }
+            }
+          }
+        },
+
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+
+      }
+    }
+     },
+     "/seller/nearest-delivery-boys": {
+     "get": {
+    "summary": "Get nearest available delivery boys",
+    "description": "Fetch nearest available delivery boys based on seller shop latitude and longitude using Haversine formula.",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Nearest delivery boys fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Nearest delivery boys fetched successfully",
+              "data": [
+                {
+                  "id": 1,
+                  "name": "Rahul Sharma",
+                  "phone": "9876543210",
+                  "latitude": 23.0225,
+                  "longitude": 72.5714,
+                  "distance_in_km": "1.25"
+                },
+                {
+                  "id": 2,
+                  "name": "Amit Patel",
+                  "phone": "9999999999",
+                  "latitude": 23.0325,
+                  "longitude": 72.5814,
+                  "distance_in_km": "2.80"
+                }
+              ]
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Shop location not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Shop location not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "404": {
+        "description": "Shop not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Shop not found"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/seller/assign-delivery-boy/{id}": {
+     "post": {
+    "summary": "Assign delivery boy to order",
+    "description": "Seller assigns an available delivery boy to an approved order and generates delivery OTP.",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Order ID"
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": [
+              "delivery_boy_id"
+            ],
+            "properties": {
+              "delivery_boy_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "550e8400-e29b-41d4-a716-446655440000"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Delivery boy assigned successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Delivery boy assigned successfully",
+              "data": {
+                "id": "d290f1ee-6c54-4b01-90e6-d701748f0851",
+                "delivery_boy_id": "550e8400-e29b-41d4-a716-446655440000",
+                "order_status": "packed",
+                "delivery_otp": 4821
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Order is not approved yet",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order is not approved yet"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "404": {
+        "description": "Order or delivery boy not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Delivery boy not found"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/seller/out-for-delivery/{id}": {
+     "post": {
+    "summary": "Mark order as out for delivery",
+    "description": "Seller marks packed order as out for delivery after handing over the order to delivery boy.",
+    "tags": ["SELLER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Order ID"
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Order marked as out for delivery successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Order marked as out for delivery successfully",
+              "data": {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "order_status": "out_for_delivery",
+                "pickup_start_time": null,
+                "pickup_end_time": null
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Invalid order state",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order is not packed yet"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "404": {
+        "description": "Order or shop not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order not found"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/seller/orders-list": {
+    "get": {
+      "summary": "Orders List",
+      "description": "Fetch all seller shop orders with products, varieties and pickup timer",
+      "tags": ["SELLER"],
+
+      "security": [
+        {
+          "BearerAuth": []
+        }
+      ],
+
+      "responses": {
+
+        "200": {
+          "description": "Orders fetched successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Orders fetched successfully",
+                "data": [
+                  {
+                    "id": "4f8fd2c3-7b83-4f5e-b11c-9dc56fcb3a12",
+
+                    "total_amount": 250,
+
+                    "total_qty": 15,
+
+                    "order_status": "approved",
+
+                    "pickup_timer": "00:59:00",
+
+                    "orderItems": [
+                      {
+                        "id": "92fbd42a-1234-4fa2-b1de-65d3db4d1234",
+
+                        "qty": 2,
+
+                        "product": {
+                          "id": "product-id",
+
+                          "price": 20,
+
+                          "unit": "Per kg",
+
+                          "variety": {
+                            "id": "variety-id",
+
+                            "name": "Alphonso",
+
+                            "icon": "uploads/variety/alphonso.png"
+                          }
+                        }
+                      },
+
+                      {
+                        "id": "92fbd42a-5678-4fa2-b1de-65d3db4d5678",
+
+                        "qty": 1,
+
+                        "product": {
+                          "id": "product-id",
+
+                          "price": 15,
+
+                          "unit": "Per kg",
+
+                          "variety": {
+                            "id": "variety-id",
+
+                            "name": "Cavendish",
+
+                            "icon": "uploads/variety/cavendish.png"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+
+        "400": {
+          "description": "Shop not found",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Shop not found"
+              }
+            }
+          }
+        },
+
+        "401": {
+          "description": "Unauthorized",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Invalid token"
+              }
+            }
+          }
+        },
+
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+
+      }
+    }
+     },
+     "/seller/update-profile": {
+    "post": {
+      "summary": "Update Seller Profile",
+      "description": "Seller can update profile image, first name, last name and email. Email must be unique.",
+      "tags": ["SELLER"],
+
+      "security": [
+        {
+          "BearerAuth": []
+        }
+      ],
+
+      "requestBody": {
+        "required": false,
+        "content": {
+
+          "multipart/form-data": {
+
+            "schema": {
+              "type": "object",
+
+              "properties": {
+
+                "profile_image": {
+                  "type": "string",
+                  "format": "binary"
+                },
+
+                "first_name": {
+                  "type": "string",
+                  "example": "Ritesh"
+                },
+
+                "last_name": {
+                  "type": "string",
+                  "example": "Kumar"
+                },
+
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "example": "ritesh@gmail.com"
+                }
+
+              }
+            }
+          }
+        }
+      },
+
+      "responses": {
+
+        "200": {
+          "description": "Profile updated successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Profile updated successfully",
+                "data": {
+                  "id": "bcb997ae-81af-439b-a52c-8c9e3b408e33",
+                  "first_name": "Ritesh",
+                  "last_name": "Kumar",
+                  "email": "ritesh@gmail.com",
+                  "image": "uploads/seller/profile-12345.png"
+                }
+              }
+            }
+          }
+        },
+
+        "400": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "examples": {
+
+                "sellerNotFound": {
+                  "value": {
+                    "status": false,
+                    "message": "Seller not found"
+                  }
+                },
+
+                "emailAlreadyExists": {
+                  "value": {
+                    "status": false,
+                    "message": "Email already exists"
+                  }
+                }
+
+              }
+            }
+          }
+        },
+
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+
+      }
+    }
+     },
+     "/seller/logout": {
+     "get": {
+      "summary": "Logout Seller",
+      "description": "Logout authenticated seller account",
+      "tags": ["SELLER"],
+
+      "security": [
+        {
+          "BearerAuth": []
+        }
+      ],
+
+      "responses": {
+
+        "200": {
+          "description": "Logout successful",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Seller logout successful"
+              }
+            }
+          }
+        },
+
+        "401": {
+          "description": "Unauthorized",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Invalid token"
+              }
+            }
+          }
+        },
+
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+
+      }
+    }
+     },
+     "/seller/delete-account": {
+    "post": {
+      "summary": "Delete Seller Account",
+      "description": "Delete authenticated seller account permanently. Related data will also be deleted using cascade delete.",
+      "tags": ["SELLER"],
+
+      "security": [
+        {
+          "BearerAuth": []
+        }
+      ],
+
+      "responses": {
+
+        "200": {
+          "description": "Seller account deleted successfully",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": true,
+                "message": "Seller account deleted successfully"
+              }
+            }
+          }
+        },
+
+        "400": {
+          "description": "Seller not found",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Seller not found"
+              }
+            }
+          }
+        },
+
+        "401": {
+          "description": "Unauthorized",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Invalid token"
+              }
+            }
+          }
+        },
+
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "example": {
+                "status": false,
+                "message": "Something went wrong"
+              }
+            }
+          }
+        }
+
+      }
+    }
+     },
+
+
+
+     "/customer/home": {
+    "get": {
+    "summary": "Home API",
+    "description": "Fetch customer profile, active categories, and best seller shops",
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Home data fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Home data fetched successfully",
+              "data": {
+
+                "customer": {
+                  "id": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0",
+                  "first_name": "Ritesh",
+                  "last_name": "Kumar",
+                  "image": "uploads/profile/profile.png",
+                  "address": "Lucknow, Uttar Pradesh"
+                },
+
+                "categories": [
+                  {
+                    "id": "11111111-2222-3333-4444-555555555555",
+                    "name": "Vegetables",
+                    "icon": "uploads/category/vegetables.png"
+                  },
+                  {
+                    "id": "66666666-7777-8888-9999-000000000000",
+                    "name": "Fruits",
+                    "icon": "uploads/category/fruits.png"
+                  }
+                ],
+
+                "bestSellers": [
+                  {
+                    "id": "shop-uuid-1",
+                    "shop_name": "Fresh Vegetable Store",
+                    "shop_keeper_name": "Ritesh Kumar",
+                    "rating": "4.8",
+                    "image": "uploads/shop/shop1.png",
+                    "address": "Lucknow"
+                  },
+                  {
+                    "id": "shop-uuid-2",
+                    "shop_name": "Organic Mart",
+                    "shop_keeper_name": "Aman Singh",
+                    "rating": "4.5",
+                    "image": "uploads/shop/shop2.png",
+                    "address": "Delhi"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Customer not found or validation error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Customer not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Authentication failed. No token provided."
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/get-subcategories/{id}": {
+     "get": {
+    "summary": "Get Sub Categories",
+    "description": "Fetch all active sub categories by category ID",
+    "tags": ["CUSTOMER"],
+
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Category ID",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+        }
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Sub categories fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "subCategory fetched successfully",
+              "data": [
+                {
+                  "id": "7a31c9a1-54e4-4dc2-8d77-f6e8c0f99a21",
+                  "name": "Vegetables",
+                  "image": "uploads/subcategory/vegetables.png"
+                },
+                {
+                  "id": "d1fbd8b0-c9c0-4d61-b72d-c8db9a9db9d0",
+                  "name": "Fruits",
+                  "image": "uploads/subcategory/fruits.png"
+                }
+              ]
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid category id"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/get-variety/{id}": {
+     "get": {
+    "summary": "Get Varieties",
+    "description": "Fetch all active varieties by sub category ID",
+    "tags": ["CUSTOMER"],
+
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Sub Category ID",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+        }
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Varieties fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Variety fetched successfully",
+              "data": [
+                {
+                  "id": "7a31c9a1-54e4-4dc2-8d77-f6e8c0f99a21",
+                  "name": "Tomato",
+                  "image": "uploads/variety/tomato.png"
+                },
+                {
+                  "id": "d1fbd8b0-c9c0-4d61-b72d-c8db9a9db9d0",
+                  "name": "Potato",
+                  "image": "uploads/variety/potato.png"
+                }
+              ]
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid sub category id"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/get-nearby-shops": {
+     "get": {
+    "summary": "Get Nearby Shops",
+    "description": "Fetch nearby approved shops based on latitude, longitude and radius. Shops are sorted by highest rating and nearest distance.",
+    "tags": ["CUSTOMER"],
+
+    "parameters": [
+
+      {
+        "name": "latitude",
+        "in": "query",
+        "required": true,
+        "description": "Customer latitude",
+        "schema": {
+          "type": "number",
+          "example": 22.7196
+        }
+      },
+
+      {
+        "name": "longitude",
+        "in": "query",
+        "required": true,
+        "description": "Customer longitude",
+        "schema": {
+          "type": "number",
+          "example": 75.8577
+        }
+      },
+
+      {
+        "name": "radius",
+        "in": "query",
+        "required": true,
+        "description": "Search radius in KM",
+        "schema": {
+          "type": "number",
+          "example": 5
+        }
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Nearby shops fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Nearby shops fetched successfully",
+              "data": [
+                {
+                  "id": "6b3fef62-40ff-4a7d-a0d1-7f3d8f1a1241",
+                  "shop_name": "Fresh Mart",
+                  "rating": "4.9",
+                  "distance": 1.2,
+                  "address": "Vijay Nagar, Indore"
+                },
+                {
+                  "id": "9ac98a42-83d9-4e8b-80a0-f9fbe4bb92b1",
+                  "shop_name": "Organic Hub",
+                  "rating": "4.5",
+                  "distance": 2.7,
+                  "address": "Palasia, Indore"
+                }
+              ]
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Latitude, longitude and radius are required"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/add-to-cart": {
+    "post": {
+    "summary": "Add Product To Cart",
+    "description": "Add a product from a specific shop to customer cart",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "shop_id",
+              "product_id",
+              "qty"
+            ],
+
+            "properties": {
+
+              "shop_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+              },
+
+              "product_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "c91fd2f5-12c2-4b75-8e18-85f4d7ecf801"
+              },
+
+              "qty": {
+                "type": "integer",
+                "example": 2
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Product added successfully",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "success": {
+                "value": {
+                  "status": true,
+                  "message": "Product added to cart successfully"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation or business logic error",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "shopNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Shop not found"
+                }
+              },
+
+              "productNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Product not found"
+                }
+              },
+
+              "insufficientStock": {
+                "value": {
+                  "status": false,
+                  "message": "Insufficient stock"
+                }
+              },
+
+              "alreadyAdded": {
+                "value": {
+                  "status": false,
+                  "message": "Product already added to cart"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/update-cart/{id}": {
+    "post": {
+    "summary": "Increase or Decrease Cart Quantity",
+    "description": "Increase, decrease or remove product quantity from cart",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Cart Item ID",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+        }
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": ["action"],
+
+            "properties": {
+
+              "action": {
+                "type": "string",
+                "enum": ["increase", "decrease"],
+                "example": "increase"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Cart updated successfully",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "increase": {
+                "value": {
+                  "status": true,
+                  "message": "Quantity increased successfully"
+                }
+              },
+
+              "decrease": {
+                "value": {
+                  "status": true,
+                  "message": "Quantity decreased successfully"
+                }
+              },
+
+              "remove": {
+                "value": {
+                  "status": true,
+                  "message": "Item removed from cart"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation or business logic error",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "cartNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Cart item not found"
+                }
+              },
+
+              "insufficientStock": {
+                "value": {
+                  "status": false,
+                  "message": "Insufficient stock"
+                }
+              },
+
+              "invalidAction": {
+                "value": {
+                  "status": false,
+                  "message": "Invalid action"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     }, 
+     "/customer/place-order": { 
+     "post": {
+    "summary": "Place Order",
+    "description": "Place order using COD or Online payment method",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "shop_id",
+              "delivery_address",
+              "payment_method"
+            ],
+
+            "properties": {
+
+              "shop_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "05fabc5a-3bc2-4338-bd16-53fef1e9b4a0"
+              },
+
+              "delivery_address": {
+                "type": "string",
+                "example": "Near City Mall, Delhi"
+              },
+
+              "payment_method": {
+                "type": "string",
+                "enum": ["cod", "online"],
+                "example": "online"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Order placed or payment initiated successfully",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "codOrder": {
+                "value": {
+                  "status": true,
+                  "message": "Order placed successfully",
+                  "data": {
+                    "id": "2fded9d7-b1d7-4f4a-8e13-c4b77fd62f21",
+                    "customer_id": "4fcbf11b-28e4-4f7e-9a76-bf05d95cb8b3",
+                    "shop_id": "1a0ceac0-bfd6-4a72-bef3-746e6cf2f111",
+                    "total_amount": 450,
+                    "payment_method": "cod",
+                    "payment_status": "pending",
+                    "order_status": "pending"
+                  }
+                }
+              },
+
+              "onlineOrder": {
+                "value": {
+                  "status": true,
+                  "message": "Payment initiated",
+                  "client_secret": "pi_3Rxxx_secret_xxx",
+                  "order_id": "2fded9d7-b1d7-4f4a-8e13-c4b77fd62f21"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation or business logic error",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "shopNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Shop not found"
+                }
+              },
+
+              "cartEmpty": {
+                "value": {
+                  "status": false,
+                  "message": "Cart is empty"
+                }
+              },
+
+              "insufficientStock": {
+                "value": {
+                  "status": false,
+                  "message": "Insufficient stock for product Apple"
+                }
+              },
+
+              "invalidPaymentMethod": {
+                "value": {
+                  "status": false,
+                  "message": "Invalid payment method"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/my-orders": {
+     "get": {
+    "summary": "My Orders List",
+    "description": "Fetch customer orders list",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Orders fetched successfully",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "My orders fetched successfully",
+              "data": [
+                {
+                  "id": "89f4d6a3-77fd-4b62-b5cf-92f2f8b7f1aa",
+                  "total_amount": 70,
+                  "order_status": "approved",
+                  "pickup_time": "1 Hr 0 Min",
+
+                  "shop": {
+                    "id": "1c4f8e4f-8df2-4d8f-9d77-5bc4fa5c3f12",
+                    "shop_name": "Fruits Shop",
+                    "shop_image": "assets/shop/shop.png",
+                    "address": "Delhi",
+                    "latitude": "28.7041",
+                    "longitude": "77.1025"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/view-order/{id}": {
+     "get": {
+    "summary": "View Order Details",
+    "description": "Fetch single order details",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+
+        "example": "89f4d6a3-77fd-4b62-b5cf-92f2f8b7f1aa"
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Order details fetched successfully",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Order details fetched successfully",
+
+              "data": {
+
+                "id": "89f4d6a3-77fd-4b62-b5cf-92f2f8b7f1aa",
+
+                "total_amount": 70,
+
+                "order_status": "approved",
+
+                "shop": {
+                  "id": "1c4f8e4f-8df2-4d8f-9d77-5bc4fa5c3f12",
+                  "shop_name": "Fruits Shop",
+                  "shop_image": "assets/shop/shop.png",
+                  "address": "Delhi",
+                  "phone_number": "9876543210"
+                },
+
+                "orderItems": [
+                  {
+                    "id": "8d7a2a77-1c11-42ea-95c0-6ffac7db0c11",
+
+                    "qty": 2,
+
+                    "price": 20,
+
+                    "sub_total": 40,
+
+                    "product": {
+
+                      "id": "7d9c4d8d-77a4-4d66-bc9d-3c94a0d4a321",
+
+                      "price": 20,
+
+                      "unit": "kg",
+
+                      "variety": {
+                        "id": "3f7a8d9a-bf77-4b8d-91f4-8e1c0b7e1c11",
+                        "name": "Alphonso",
+                        "image": "assets/variety/mango.png"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Order not found",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order not found"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/update-profile": {
+     "post": {
+    "summary": "Update Customer Profile",
+    "description": "Update customer profile details such as first name, last name, email and profile image",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": false,
+
+      "content": {
+        "multipart/form-data": {
+          "schema": {
+            "type": "object",
+
+            "properties": {
+
+              "first_name": {
+                "type": "string",
+                "example": "Ritesh"
+              },
+
+              "last_name": {
+                "type": "string",
+                "example": "Kumar"
+              },
+
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "ritesh@mail.com"
+              },
+
+              "profile_image": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Profile updated successfully",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Profile updated successfully",
+              "data": {
+                "id": "2e71e125-123d-4543-bbf7-94590900e183",
+                "first_name": "Ritesh",
+                "last_name": "Kumar",
+                "email": "ritesh@mail.com",
+                "profile_image": "assets/customer/profile-1723456789.png",
+                "role": "customer"
+              }
+            }
+          }
+        }
+       },
+
+      "400": {
+        "description": "Validation or business logic error",
+
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "customerNotFound": {
+                "value": {
+                  "status": false,
+                  "message": "Customer not found"
+                }
+              },
+
+              "emailExists": {
+                "value": {
+                  "status": false,
+                  "message": "Email already exists"
+                }
+              }
+            }
+          }
+        }
+      },
+ 
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/logout": {
+     "post": {
+    "summary": "Logout Customer",
+    "description": "Logout authenticated customer from the application",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Customer logout successful",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Customer logout successful"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Unauthorized access"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+     "/customer/delete-account": {
+     "post": {
+     "summary": "Delete Customer Account",
+     "description": "Delete authenticated customer account permanently",
+
+    "tags": ["CUSTOMER"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Customer account deleted successfully",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Customer account deleted successfully"
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Customer not found",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Customer not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Unauthorized access"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+    }
+  }
+     },
+ 
+
+     "/delivery-boy/signup": {
+      "post": {
+    "summary": "Delivery boy signup",
+    "description": "Register a new delivery boy with profile image and vehicle details.",
+    "tags": ["DELIVERY BOY"],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "multipart/form-data": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "name",
+              "email",
+              "country_code",
+              "phone",
+              "address",
+              "vehicle_name",
+              "vehicle_number",
+              "profile_image"
+            ],
+
+            "properties": {
+
+              "name": {
+                "type": "string",
+                "example": "Rahul Sharma"
+              },
+
+              "email": {
+                "type": "string",
+                "example": "rahul.sharma@example.com"
+              },
+
+              "country_code": {
+                "type": "string",
+                "example": "+91"
+              },
+
+              "phone": {
+                "type": "string",
+                "example": "9876543210"
+              },
+
+              "address": {
+                "type": "string",
+                "example": "Ahmedabad, Gujarat"
+              },
+
+              "vehicle_name": {
+                "type": "string",
+                "example": "Honda Shine"
+              },
+
+              "vehicle_number": {
+                "type": "string",
+                "example": "GJ01AB1234"
+              },
+
+              "profile_image": {
+                "type": "string",
+                "format": "binary"
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Delivery boy registered successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Delivery boy registered successfully"
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Validation error",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "phone_exists": {
+                "summary": "Phone already registered",
+                "value": {
+                  "status": false,
+                  "message": "Phone number already registered"
+                }
+              },
+
+              "image_required": {
+                "summary": "Profile image required",
+                "value": {
+                  "status": false,
+                  "message": "Profile image is required"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/login": {
+     "post": {
+    "summary": "Delivery boy login",
+    "description": "Login delivery boy using country code and phone number. OTP will be generated and sent for verification.",
+    "tags": ["DELIVERY BOY"],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "email",
+              "latitude",
+              "longitude"
+            ],
+
+            "properties": {
+
+              "email": {
+                "type": "string",
+                "example": "rahul.sharma@example.com"
+              },
+
+              "latitude": {
+                "type": "number",
+                "example": 23.0225
+              },
+
+              "longitude": {
+                "type": "number",
+                "example": 72.5714
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "OTP sent successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Login Otp send successfully",
+              "otp": "458921"
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Delivery boy not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Delivery boy not found"
+            }
+          }
+        }
+      },
+
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "\"phone\" is required"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/verify-otp": {
+     "post": {
+    "summary": "Verify delivery boy OTP",
+    "description": "Verify OTP for delivery boy login and generate JWT authentication token.",
+    "tags": ["DELIVERY BOY"],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "email",
+              "otp"
+            ],
+
+            "properties": {
+              "email": {
+                "type": "string",
+                "example": "rahul.sharma@example.com"
+              },
+              
+              "otp": {
+                "type": "string",
+                "example": "458921"
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "OTP verified successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Login successfully",
+              "token": "jwt_token_here",
+              "data": {
+                "id": "0c5c1e9d-0f8f-4f5a-a7cf-b7d8e9f0d123",
+                "name": "Rahul Sharma",
+                "country_code": "+91",
+                "phone": "9876543210",
+                "profile_image": "uploads/delivery-boy/profile.png",
+                "address": "Ahmedabad, Gujarat",
+                "vehicle_name": "Honda Shine",
+                "vehicle_number": "GJ01AB1234",
+                "status": "available"
+              }
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "OTP verification failed",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "delivery_boy_not_found": {
+                "summary": "Delivery boy not found",
+                "value": {
+                  "status": false,
+                  "message": "Delivery boy not found"
+                }
+              },
+
+              "invalid_otp": {
+                "summary": "Invalid OTP",
+                "value": {
+                  "status": false,
+                  "message": "Invalid OTP"
+                }
+              },
+
+              "otp_expired": {
+                "summary": "OTP expired",
+                "value": {
+                  "status": false,
+                  "message": "OTP expired"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "\"otp\" is required"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/assigned-orders": {
+     "get": {
+    "summary": "Get assigned orders for delivery boy",
+    "description": "Fetch all orders assigned to authenticated delivery boy including customer details and ordered products.",
+    "tags": ["DELIVERY BOY"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Assigned orders fetched successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "data": [
+                {
+                  "id": "550e8400-e29b-41d4-a716-446655440000",
+                  "order_status": "out_for_delivery",
+                  "payment_method": "cod",
+                  "total_amount": 450,
+                  "delivery_address": "Ahmedabad, Gujarat",
+
+                  "customer": {
+                    "id": "c1d2e3f4-g5h6-7890-abcd-123456789000",
+                    "name": "Ritesh Kumar",
+                    "phone": "9876543210"
+                  },
+
+                  "orderItems": [
+                    {
+                      "id": "o123",
+                      "qty": 2,
+                      "price": 150,
+                      "sub_total": 300,
+
+                      "product": {
+                        "id": "p123",
+                        "name": "Pizza",
+                        "image": "uploads/products/pizza.png"
+                      }
+                    },
+
+                    {
+                      "id": "o124",
+                      "qty": 1,
+                      "price": 150,
+                      "sub_total": 150,
+
+                      "product": {
+                        "id": "p124",
+                        "name": "Burger",
+                        "image": "uploads/products/burger.png"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/accept-order/{id}": {
+     "post": {
+    "summary": "Accept assigned order",
+    "description": "Delivery boy accepts assigned order and updates order status to assigned.",
+    "tags": ["DELIVERY BOY"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Order ID"
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Order accepted successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Order accepted successfully"
+            }
+          }
+        }
+      },
+
+      "404": {
+        "description": "Order not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/pickup-order/{id}": {
+     "post": {
+    "summary": "Pickup assigned order",
+    "description": "Delivery boy picks up the order from the shop and order status changes to picked_up.",
+    "tags": ["DELIVERY BOY"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "b8f5f2f1-2d65-4d88-a6e4-2f6c8f8f1234"
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Order picked successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Order picked successfully"
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Order not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/out-for-delivery/{id}": {
+     "post": {
+    "summary": "Mark order as out for delivery",
+    "description": "Delivery boy marks the picked order as out for delivery.",
+    "tags": ["DELIVERY BOY"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "b8f5f2f1-2d65-4d88-a6e4-2f6c8f8f1234"
+      }
+    ],
+
+    "responses": {
+
+      "200": {
+        "description": "Order marked as out for delivery successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Order is out for delivery"
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "Order not found",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Order not found"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/verify-delivery-otp": {
+     "post": {
+    "summary": "Verify delivery OTP",
+    "description": "Delivery boy verifies the delivery OTP provided by the customer and marks the order as delivered.",
+    "tags": ["DELIVERY BOY"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "order_id",
+              "otp"
+            ],
+
+            "properties": {
+
+              "order_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "b8f5f2f1-2d65-4d88-a6e4-2f6c8f8f1234"
+              },
+
+              "otp": {
+                "type": "string",
+                "example": "4589"
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Order delivered successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Order delivered successfully"
+            }
+          }
+        }
+      },
+
+      "400": {
+        "description": "OTP verification failed",
+        "content": {
+          "application/json": {
+            "examples": {
+
+              "order_not_found": {
+                "summary": "Order not found",
+                "value": {
+                  "status": false,
+                  "message": "Order not found"
+                }
+              },
+
+              "invalid_otp": {
+                "summary": "Invalid OTP",
+                "value": {
+                  "status": false,
+                  "message": "Invalid OTP"
+                }
+              }
+
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "\"otp\" is required"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     },
+     "/delivery-boy/toggle-availability": {
+     "post": {
+    "summary": "Toggle delivery boy availability",
+    "description": "Delivery boy can update their availability status to available or unavailable.",
+    "tags": ["DELIVERY BOY"],
+
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+
+            "required": [
+              "is_available"
+            ],
+
+            "properties": {
+
+              "is_available": {
+                "type": "boolean",
+                "example": true
+              }
+
+            }
+          }
+        }
+      }
+    },
+
+    "responses": {
+
+      "200": {
+        "description": "Availability updated successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": true,
+              "message": "Availability updated"
+            }
+          }
+        }
+      },
+
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Invalid token"
+            }
+          }
+        }
+      },
+
+      "422": {
+        "description": "Validation Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "\"is_available\" is required"
+            }
+          }
+        }
+      },
+
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "example": {
+              "status": false,
+              "message": "Something went wrong"
+            }
+          }
+        }
+      }
+
+    }
+  }
+     }
+
+
+    },
+
+    "components": {
+    "securitySchemes": {
+    "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}
