@@ -1,8 +1,9 @@
 import express from "express";
 import validate from "../../utils/validate.js";
-import { register, verifyOtp, logIn, forgetPassword, resetPassword, resendOtp, roleChange } from "./controller.js";
+import { register, verifyOtp, logIn, forgetPassword, resetPassword, resendOtp, roleChange, getProfile, updateProfile } from "./controller.js";
 import Joi from "joi";
 import {authenticateToken} from "../../common/middleware/authenticateToken.js"
+import createMulter from "../../utils/multer.js";
 
 
 const router = express.Router();
@@ -79,6 +80,19 @@ router.post(
   "/role-change",
    authenticateToken,
    roleChange
+);
+
+router.get(
+  "/get-profile",
+  authenticateToken,
+  getProfile
+);
+
+router.post(
+  "/update-profile",
+  authenticateToken,
+  createMulter("users").single("profile_image"),
+  updateProfile
 );
 
 export default router;

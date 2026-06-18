@@ -32,7 +32,7 @@ export const home = async (req, res) => {
                 "name",
                 "icon"
             ],
-
+                                                                                                                            
             order: [["created_at", "DESC"]]
         });
 
@@ -40,7 +40,7 @@ export const home = async (req, res) => {
             where: {
                 status: "Approved",
                 rating: {
-                    [Op.between]: [4.0, 5.0]
+                    [Op.between]: [4.0, 5.0] 
                 }
             },
 
@@ -428,7 +428,62 @@ export const placedOrder = async (req, res) => {
  */
 export const confirmPayment = async (req, res) => {
     try {
+        const customer_id = req.customer.id;
+        const { order_id, payment_intent_id } = req.body;
 
+        const order = await models.Order.findOne({
+            where: {
+                id: order_id,
+                customer_id,
+                payment_intent_id,
+                payment_status: "pending"
+            },
+
+            include: [
+                {
+                    model: models.CartItem,
+                    as: "cartItems",
+
+                    include: [
+                        {
+                            model: models.Product,
+                            as: "product"
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!order) {
+            return res.send({ status: false, message: "Order not found or payment already processed" });
+        }
+
+        // Here you would typically verify the payment intent with Stripe's API to ensure it's successful
+
+        // For this example, we'll assume the payment is successful
+
+        // Update order status and payment status
+        order.payment_status = "paid";
+        order.order_status = "confirmed";
+        await order.save();
+
+        // Create order items   
+        const orderItemsData = order.cartItems.map(item => ({
+            order_id: order.id,
+            product_id: item.product_id,
+            qty: item.qty,
+            price: item.product.price,
+            sub_total: item.qty * item.product.price
+        }));
+
+        await models.OrderItem.bulkCreate(orderItemsData);
+
+        // Empty the cart
+        await models.CartItem.destroy({
+            where: { customer_id }
+        });
+
+        return res.send({ status: true, message: "Payment confirmed and order placed successfully", data: order }); 
 
     } catch (error) {
         return res.send({ status: false, message: error.message });

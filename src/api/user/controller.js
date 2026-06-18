@@ -1,26 +1,28 @@
 import models from "../../models/index.js";
 import { Op } from "sequelize";
 import bcrypt from "bcrypt";
-import { generateOtp, generateTime, generateToken} from "./service.js";
+import { generateOtp, generateTime, generateToken } from "./service.js";
 import sendEmailOtp from "../../utils/sendEmailOtp.js";
+import fs from "fs";
+import path from "path";
 
 
 /**
  * @method POST
  * @description Use to register user 
  */
-export const register = async (req,res) => {
+export const register = async (req, res) => {
     try {
-        const {first_name, last_name, email, country_code, phone_number, password } = req.body;
+        const { first_name, last_name, email, country_code, phone_number, password } = req.body;
 
         //check for existance of user
         const user = await models.User.findOne({
-            where : {
-                [Op.or] : [{email}, {phone_number}]
+            where: {
+                [Op.or]: [{ email }, { phone_number }]
             }
         })
 
-        if(user){ return res.send({status: false, message: "Email or Phone_number already Registered"})};
+        if (user) { return res.send({ status: false, message: "Email or Phone_number already Registered" }) };
 
         const otp = generateOtp();
         const expiry_time = generateTime();
@@ -28,14 +30,14 @@ export const register = async (req,res) => {
 
         //create User
         const register = await models.User.create({
-            first_name   : first_name, 
-            last_name    : last_name, 
-            email        : email, 
-            country_code : country_code, 
-            phone_number : phone_number, 
-            password     : hashedPassword,
-            otp          : otp,
-            expiry_time  : expiry_time
+            first_name: first_name,
+            last_name: last_name,
+            email: email,
+            country_code: country_code,
+            phone_number: phone_number,
+            password: hashedPassword,
+            otp: otp,
+            expiry_time: expiry_time
         })
 
         if (!register) {
@@ -47,20 +49,20 @@ export const register = async (req,res) => {
             "Verify Your Email - AgLink App",
             "email_verification",
             {
-             name: register.first_name || "User",
-             otp,
-             year: new Date().getFullYear(),
+                name: register.first_name || "User",
+                otp,
+                year: new Date().getFullYear(),
             }
         );
-        
+
         res.send({
-            status: true, 
+            status: true,
             message: "Otp sent to Registered Email",
             data: register
         })
-        
+
     } catch (error) {
-     return res.send({ status: false, message: error.message })
+        return res.send({ status: false, message: error.message })
     }
 };
 
@@ -68,30 +70,30 @@ export const register = async (req,res) => {
  * @method POST
  * @description Use to Verify User
  */
-export const verifyOtp = async (req,res)=>{
+export const verifyOtp = async (req, res) => {
     try {
-    
-        const {otp, id} = req.body;
-        
+
+        const { otp, id } = req.body;
+
         const user = await models.User.findByPk(id);
 
-        if(user?.otp !== otp){
-            return res.send({status:false, message: "Invalid Otp"})
+        if (user?.otp !== otp) {
+            return res.send({ status: false, message: "Invalid Otp" })
         }
 
-        if(user?.expiry_time < Math.floor(Date.now() / 1000)){
-            return res.send({status:false, message: "Otp Expired"})
+        if (user?.expiry_time < Math.floor(Date.now() / 1000)) {
+            return res.send({ status: false, message: "Otp Expired" })
         }
 
-        if(user.is_verified){
+        if (user.is_verified) {
 
-        await user.update({ otp: null, expiry_time: null });
+            await user.update({ otp: null, expiry_time: null });
 
-        return res.send({status: true, message: "Verified successfully"}); 
+            return res.send({ status: true, message: "Verified successfully" });
 
         }
 
-        await user.update({ 
+        await user.update({
             is_verified: true,
             otp: null,
             expiry_time: null
@@ -100,10 +102,10 @@ export const verifyOtp = async (req,res)=>{
         return res.send({
             status: true,
             message: "Verified successfully",
-        }); 
+        });
 
     } catch (error) {
-        return res.send({status: false, message: error.message})
+        return res.send({ status: false, message: error.message })
     }
 }
 
@@ -111,41 +113,41 @@ export const verifyOtp = async (req,res)=>{
  * @method POST 
  * @description Use to Login user
  */
-export const logIn = async (req,res) => {
+export const logIn = async (req, res) => {
     try {
-        const {email, password} = req.body;
+        const { email, password } = req.body;
 
         const user = await models.User.findOne({
-            where : {email: email}
+            where: { email: email }
         });
 
-        if(!user){
-            return res.send({status: false, message: "user not found"})
+        if (!user) {
+            return res.send({ status: false, message: "user not found" })
         }
 
         const verifyPassword = await bcrypt.compare(password, user.password);
 
-        if(!verifyPassword){
-            return res.send({status: false, message: "Incorrect Password"})
+        if (!verifyPassword) {
+            return res.send({ status: false, message: "Incorrect Password" })
         }
 
-        if(!user.is_verified){
+        if (!user.is_verified) {
             const otp = generateOtp();
             const expiry_time = generateTime();
 
-            await user.update({otp: otp, expiry_time: expiry_time});
+            await user.update({ otp: otp, expiry_time: expiry_time });
 
             await sendEmailOtp(
-            user.email,
-            "Verify Your Email - AgLink App",
-            "email_verification",
-            {
-             name: user.first_name || "User",
-             otp,
-             year: new Date().getFullYear(),
-            }
-        );
-            return res.send({status: false, message: "Otp Send Successfully. Please verify your email before logging in."})
+                user.email,
+                "Verify Your Email - AgLink App",
+                "email_verification",
+                {
+                    name: user.first_name || "User",
+                    otp,
+                    year: new Date().getFullYear(),
+                }
+            );
+            return res.send({ status: false, message: "Otp Send Successfully. Please verify your email before logging in." })
         }
 
         const token = generateToken(user);
@@ -157,7 +159,7 @@ export const logIn = async (req,res) => {
         })
 
     } catch (error) {
-    return res.send({ status: false, message: error.message });
+        return res.send({ status: false, message: error.message });
     }
 }
 
@@ -165,38 +167,38 @@ export const logIn = async (req,res) => {
  * @method POST
  * @description Forget Reset
  */
-export const forgetPassword = async (req,res) => {
+export const forgetPassword = async (req, res) => {
     try {
-        const {email} = req.body;
-    
+        const { email } = req.body;
+
         const user = await models.User.findOne({
-            where : {email}
+            where: { email }
         });
 
-        if(!user){
-            return res.send({status: false, message: "User not found"});
+        if (!user) {
+            return res.send({ status: false, message: "User not found" });
         }
 
         const otp = generateOtp();
         const expiry_time = generateTime();
 
-        await user.update({otp: otp, expiry_time: expiry_time});
+        await user.update({ otp: otp, expiry_time: expiry_time });
 
         await sendEmailOtp(
             user.email,
             "Verify Your Email - AgLink App",
             "email_verification",
             {
-             name: user.first_name || "User",
-             otp,
-             year: new Date().getFullYear(),
+                name: user.first_name || "User",
+                otp,
+                year: new Date().getFullYear(),
             }
         );
 
-        return res.send({status: false, message: "Otp send Successful", data: {id: user.id} });
+        return res.send({ status: false, message: "Otp send Successful", data: { id: user.id } });
 
     } catch (error) {
-        return res.send({status: false, message: error.message})
+        return res.send({ status: false, message: error.message })
     }
 }
 
@@ -204,21 +206,21 @@ export const forgetPassword = async (req,res) => {
  * @method POST
  * @description Password Reset
  */
-export const resetPassword = async (req,res) => {
+export const resetPassword = async (req, res) => {
     try {
-        const {password, id} = req.body;
+        const { password, id } = req.body;
 
         const user = await models.User.findByPk(id);
-        if(!user){ return res.send({status: false, message: "User not found" }) }
+        if (!user) { return res.send({ status: false, message: "User not found" }) }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await user.update({password: hashedPassword});
+        await user.update({ password: hashedPassword });
 
-        return res.send({status: true, message: "Password reset successful"});
+        return res.send({ status: true, message: "Password reset successful" });
 
     } catch (error) {
-        return res.send({status: false, message: error.message})
+        return res.send({ status: false, message: error.message })
     }
 }
 
@@ -226,17 +228,17 @@ export const resetPassword = async (req,res) => {
  * @method POST
  * @description Resend OTP
  */
-export const resendOtp = async (req,res) => {
+export const resendOtp = async (req, res) => {
     try {
         const userId = req.body.id;
 
         const user = await models.User.findByPk(userId);
-        if(!user){ return res.send({ status: false, message: "User not found" }) }
+        if (!user) { return res.send({ status: false, message: "User not found" }) }
 
-        const current_time = Math.floor(Date.now()/1000);  //Time in sec
+        const current_time = Math.floor(Date.now() / 1000);  //Time in sec
 
         //Handling Rate Limit : 60 sec
-        if(user.last_sent_at && current_time < user.last_sent_at){
+        if (user.last_sent_at && current_time < user.last_sent_at) {
             const waitTime = user.last_sent_at - current_time;
             return res.send({
                 status: false,
@@ -248,25 +250,27 @@ export const resendOtp = async (req,res) => {
         const expiry_time = generateTime();
         const lastTimeOtpSend = current_time + 60;  //60 sec cool down 
 
-        await user.update({ otp: otp, expiry_time: expiry_time, last_sent_at:lastTimeOtpSend })
+        await user.update({ otp: otp, expiry_time: expiry_time, last_sent_at: lastTimeOtpSend })
 
         await sendEmailOtp(
             user.email,
             "Verify Your Email - AgLink App",
             "email_verification",
             {
-             name: user.first_name || "User",
-             otp,
-             year: new Date().getFullYear(),
+                name: user.first_name || "User",
+                otp,
+                year: new Date().getFullYear(),
             }
         );
 
-        return res.send({status: true, message: "Resend Otp Send"});
+        return res.send({ status: true, message: "Resend Otp Send" });
 
     } catch (error) {
-        return res.send({status: false, message: error.message})
+        return res.send({ status: false, message: error.message })
     }
 }
+
+
 
 
 /**
@@ -277,22 +281,85 @@ export const roleChange = async (req, res) => {
     try {
         const currentUser = req.customer || req.seller;
 
-        const user = await models.User.findByPk( currentUser.id );
-        if(!user){
-            return res.send({status: false, message: "User not found"});
+        const user = await models.User.findByPk(currentUser.id);
+        if (!user) {
+            return res.send({ status: false, message: "User not found" });
         }
 
-        if( user.role === "customer" ){
-            await user.update({ role : "seller" });
-            return res.send({status: true, message: "Role changed to seller"});
+        if (user.role === "customer") {
+            await user.update({ role: "seller" });
+            return res.send({ status: true, message: "Role changed to seller" });
         }
 
-        await user.update({ role : "customer" });
-        return res.send({status: true, message: "Role changed to customer"});
+        await user.update({ role: "customer" });
+        return res.send({ status: true, message: "Role changed to customer" });
 
     } catch (error) {
-        return res.send({status: false, message: error.message});
+        return res.send({ status: false, message: error.message });
     }
-}
+};
+
+/**
+ * @method GET
+ * @description Get User Profile
+ */
+export const getProfile = async (req, res) => {
+    try {
+        const currentUser = req.customer || req.seller || req.admin;
+        
+        const user = await models.User.findByPk(currentUser.id, {
+            attributes: { exclude: ["password", "otp", "expiry_time", "last_sent_at"] }
+        });
+
+        if (!user) {
+            return res.send({ status: false, message: "User not found" });
+        }
+
+        return res.send({ status: true, message: "Profile fetched successfully", data: user });
+    } catch (error) {
+        return res.send({ status: false, message: error.message });
+    }
+};
+
+/**
+ * @method POST
+ * @description Update User Profile
+ */
+export const updateProfile = async (req, res) => {
+    try {
+        const currentUser = req.customer || req.seller || req.admin;
+        const { first_name, last_name, address, latitude, longitude } = req.body;
+
+        const user = await models.User.findByPk(currentUser.id);
+        if (!user) {
+            return res.send({ status: false, message: "User not found" });
+        }
+
+        let updateData = {
+            first_name: first_name || user.first_name,
+            last_name: last_name || user.last_name,
+            address: address || user.address,
+            latitude: latitude || user.latitude,
+            longitude: longitude || user.longitude,
+        };
+
+        if (req.file) {
+            // Delete old profile image if exists
+            if (user.profile_image) {
+                const oldImagePath = path.join(process.cwd(), user.profile_image);
+                if (fs.existsSync(oldImagePath)) {
+                    fs.unlinkSync(oldImagePath);
+                }
+            }
+            updateData.profile_image = req.file.path;
+        }
+
+        await user.update(updateData);
+
+        return res.send({ status: true, message: "Profile updated successfully", data: user });
+    } catch (error) {
+        return res.send({ status: false, message: error.message });
+    }
+};
 
 

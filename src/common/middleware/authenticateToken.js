@@ -21,11 +21,10 @@ export const authenticateToken = async(req,res,next) => {
     let user ;
     
     if( role == "admin" ){
-      user = await models.Admin.findByPk(id);
+      user = await models.User.findByPk(id);
       if(!user){
         return res.send({status: false, message: "Authentication failed. Admin not authorized."});
       }
-
       req.admin = user;
     } 
     else if( role == "customer"){

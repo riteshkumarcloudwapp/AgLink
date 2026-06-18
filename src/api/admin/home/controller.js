@@ -1,4 +1,6 @@
 import models from "../../../models/index.js";
+import fs from "fs";
+import path from "path";
 
 /**
  * @method POST
@@ -6,27 +8,27 @@ import models from "../../../models/index.js";
 */
 export const addCategory = async (req, res) => {
     try {
-        const {name} = req.body;
-        
-        const category = await models.Category.findOne({ where: {name} });
-        if(category){
-            return res.send({ status:false, message: "Category already exist" });
+        const { name } = req.body;
+
+        const category = await models.Category.findOne({ where: { name } });
+        if (category) {
+            return res.send({ status: false, message: "Category already exist" });
         }
 
         const icon = req.file?.path;
-        if(!icon){
-            return res.send({ status:false, message: "Category Icon required" });
+        if (!icon) {
+            return res.send({ status: false, message: "Category Icon required" });
         };
 
         await models.Category.create({
-            name : name,
-            icon : icon
+            name: name,
+            icon: icon
         });
 
         return res.send({ status: true, message: "Category added successfully" });
 
     } catch (error) {
-     return res.send({ status: false, message: error.message});   
+        return res.send({ status: false, message: error.message });
     }
 }
 
@@ -36,30 +38,30 @@ export const addCategory = async (req, res) => {
 */
 export const editCategory = async (req, res) => {
     try {
-        const {name} = req.body;
+        const { name } = req.body;
         const category_id = req.params.id;
-        
+
         const category = await models.Category.findByPk(category_id);
-        if(!category){
-            return res.send({ status:false, message: "Category not found" });
+        if (!category) {
+            return res.send({ status: false, message: "Category not found" });
         }
 
         //delete old icon
-        if(req.file && category.icon){
-            const filePath = path.join( process.cwd(), category.icon );
-            
-            if( fs.existsSync(filePath) ) { fs.unlinkSync(filePath) }
+        if (req.file && category.icon) {
+            const filePath = path.join(process.cwd(), category.icon);
+
+            if (fs.existsSync(filePath)) { fs.unlinkSync(filePath) }
         }
 
         await category.update({
             name: name && name.trim() !== "" ? name : category.name,
-            icon : req.file?.path ?? category.icon
+            icon: req.file?.path ?? category.icon
         });
 
         return res.send({ status: true, message: "Category updated successfully" });
 
     } catch (error) {
-     return res.send({ status: false, message: error.message});   
+        return res.send({ status: false, message: error.message });
     }
 }
 
@@ -70,14 +72,14 @@ export const editCategory = async (req, res) => {
 export const getAllCategory = async (req, res) => {
     try {
         const category = await models.Category.findAll({
-            where : { status: "active" } ,
+            where: { status: "active" },
             order: [["created_at", "DESC"]]
         });
 
-        return res.send({ status: true, message: "Category fetched successfully", data:category });
+        return res.send({ status: true, message: "Category fetched successfully", data: category });
 
     } catch (error) {
-     return res.send({ status: false, message: error.message});   
+        return res.send({ status: false, message: error.message });
     }
 }
 
@@ -87,11 +89,11 @@ export const getAllCategory = async (req, res) => {
 */
 export const deleteCategory = async (req, res) => {
     try {
-        const {id} = req.params;
-        
+        const { id } = req.params;
+
         const category = await models.Category.findByPk(id);
-        if(!category){
-            return res.send({ status:false, message: "Category not found" });
+        if (!category) {
+            return res.send({ status: false, message: "Category not found" });
         }
 
         //delete icon from assets folder
@@ -106,7 +108,7 @@ export const deleteCategory = async (req, res) => {
         return res.send({ status: true, message: "Category deleted successfully" });
 
     } catch (error) {
-     return res.send({ status: false, message: error.message});   
+        return res.send({ status: false, message: error.message });
     }
 }
 
@@ -117,33 +119,33 @@ export const deleteCategory = async (req, res) => {
 */
 export const addSubCategory = async (req, res) => {
     try {
-        const {name, category_id} = req.body;
-        
+        const { name, category_id } = req.body;
+
         const category = await models.Category.findByPk(category_id);
-            if (!category) {
+        if (!category) {
             return res.send({ status: false, message: "Category not found" });
         }
 
-        const subCategory = await models.SubCategory.findOne({ where: {name, category_id} });
-        if(subCategory){
-            return res.send({ status:false, message: "subCategory already exist" });
+        const subCategory = await models.SubCategory.findOne({ where: { name, category_id } });
+        if (subCategory) {
+            return res.send({ status: false, message: "subCategory already exist" });
         }
 
         const image = req.file?.path;
-        if(!image){
-            return res.send({ status:false, message: "subCategory image required" });
+        if (!image) {
+            return res.send({ status: false, message: "subCategory image required" });
         };
 
         await models.SubCategory.create({
-            name  : name,
-            image : image,
-            category_id : category_id
+            name: name,
+            image: image,
+            category_id: category_id
         });
 
         return res.send({ status: true, message: "subCategory added successfully" });
 
     } catch (error) {
-     return res.send({ status: false, message: error.message});   
+        return res.send({ status: false, message: error.message });
     }
 }
 
@@ -153,29 +155,29 @@ export const addSubCategory = async (req, res) => {
 */
 export const editSubCategory = async (req, res) => {
     try {
-        const {name} = req.body;
+        const { name } = req.body;
         const sub_category_id = req.params.id;
-        
+
         const subCategory = await models.SubCategory.findByPk(sub_category_id);
-        if(!subCategory){
-            return res.send({ status:false, message: "subCategory not found" });
+        if (!subCategory) {
+            return res.send({ status: false, message: "subCategory not found" });
         }
 
-        if(req.file && subCategory.image){
-            const filePath = path.join( process.cwd(), subCategory.image );
-            
-            if( fs.existsSync(filePath) ) { fs.unlinkSync(filePath) }
+        if (req.file && subCategory.image) {
+            const filePath = path.join(process.cwd(), subCategory.image);
+
+            if (fs.existsSync(filePath)) { fs.unlinkSync(filePath) }
         }
 
         await subCategory.update({
-            name : name && name.trim() !== "" ? name : subCategory.name ,
-            image : req.file?.path ?? subCategory.image
+            name: name && name.trim() !== "" ? name : subCategory.name,
+            image: req.file?.path ?? subCategory.image
         });
 
         return res.send({ status: true, message: "subCategory updated successfully" });
 
     } catch (error) {
-     return res.send({ status: false, message: error.message});   
+        return res.send({ status: false, message: error.message });
     }
 }
 
@@ -186,14 +188,14 @@ export const editSubCategory = async (req, res) => {
 export const getAllSubCategory = async (req, res) => {
     try {
         const subCategory = await models.SubCategory.findAll({
-            where : { status: "active" } ,
+            where: { status: "active" },
             order: [["created_at", "DESC"]]
         });
 
-        return res.send({ status: true, message: "subCategory fetched successfully", data:subCategory });
+        return res.send({ status: true, message: "subCategory fetched successfully", data: subCategory });
 
     } catch (error) {
-     return res.send({ status: false, message: error.message});   
+        return res.send({ status: false, message: error.message });
     }
 }
 
@@ -203,11 +205,11 @@ export const getAllSubCategory = async (req, res) => {
 */
 export const deleteSubCategory = async (req, res) => {
     try {
-        const {id} = req.params;
-        
+        const { id } = req.params;
+
         const subCategory = await models.SubCategory.findByPk(id);
-        if(!subCategory){
-            return res.send({ status:false, message: "subCategory not found" });
+        if (!subCategory) {
+            return res.send({ status: false, message: "subCategory not found" });
         }
 
         //delete icon from assets folder
@@ -222,7 +224,7 @@ export const deleteSubCategory = async (req, res) => {
         return res.send({ status: true, message: "subCategory deleted successfully" });
 
     } catch (error) {
-     return res.send({ status: false, message: error.message});   
+        return res.send({ status: false, message: error.message });
     }
 }
 
@@ -232,33 +234,33 @@ export const deleteSubCategory = async (req, res) => {
 */
 export const addVarieties = async (req, res) => {
     try {
-        const {name, sub_category_id} = req.body;
-        
+        const { name, sub_category_id } = req.body;
+
         const subCategory = await models.SubCategory.findByPk(sub_category_id);
-            if (!subCategory) {
+        if (!subCategory) {
             return res.send({ status: false, message: "subCategory not found" });
         }
 
-        const variety = await models.Variety.findOne({ where: {name, sub_category_id} });
-        if(variety){
-            return res.send({ status:false, message: "variety already exist" });
+        const variety = await models.Variety.findOne({ where: { name, sub_category_id } });
+        if (variety) {
+            return res.send({ status: false, message: "variety already exist" });
         }
 
         const image = req.file?.path;
-        if(!image){
-            return res.send({ status:false, message: "variety image required" });
+        if (!image) {
+            return res.send({ status: false, message: "variety image required" });
         };
 
         await models.Variety.create({
-            name  : name,
-            image : image,
-            sub_category_id : sub_category_id
+            name: name,
+            image: image,
+            sub_category_id: sub_category_id
         });
 
         return res.send({ status: true, message: "variety added successfully" });
 
     } catch (error) {
-     return res.send({ status: false, message: error.message});   
+        return res.send({ status: false, message: error.message });
     }
 }
 
@@ -268,29 +270,29 @@ export const addVarieties = async (req, res) => {
 */
 export const editVarieties = async (req, res) => {
     try {
-        const {name} = req.body;
-        const {id} = req.params;
-        
+        const { name } = req.body;
+        const { id } = req.params;
+
         const variety = await models.Variety.findByPk(id);
-        if(!variety){
-            return res.send({ status:false, message: "variety not found" });
+        if (!variety) {
+            return res.send({ status: false, message: "variety not found" });
         }
 
-        if(req.file && variety.image){
-            const filePath = path.join( process.cwd(), variety.image );
-            
-            if( fs.existsSync(filePath) ) { fs.unlinkSync(filePath) }
+        if (req.file && variety.image) {
+            const filePath = path.join(process.cwd(), variety.image);
+
+            if (fs.existsSync(filePath)) { fs.unlinkSync(filePath) }
         }
 
         await variety.update({
-            name : name && name.trim() !== "" ? name : variety.name ,
-            image : req.file?.path ?? variety.image
+            name: name && name.trim() !== "" ? name : variety.name,
+            image: req.file?.path ?? variety.image
         });
 
         return res.send({ status: true, message: "variety updated successfully" });
 
     } catch (error) {
-     return res.send({ status: false, message: error.message});   
+        return res.send({ status: false, message: error.message });
     }
 }
 
@@ -301,14 +303,14 @@ export const editVarieties = async (req, res) => {
 export const getAllVarieties = async (req, res) => {
     try {
         const variety = await models.Variety.findAll({
-            where : { status: "active" } ,
+            where: { status: "active" },
             order: [["created_at", "DESC"]]
         });
 
-        return res.send({ status: true, message: "variety fetched successfully", data:variety });
+        return res.send({ status: true, message: "variety fetched successfully", data: variety });
 
     } catch (error) {
-     return res.send({ status: false, message: error.message});   
+        return res.send({ status: false, message: error.message });
     }
 }
 
@@ -318,11 +320,11 @@ export const getAllVarieties = async (req, res) => {
 */
 export const deleteVarieties = async (req, res) => {
     try {
-        const {id} = req.params;
-        
+        const { id } = req.params;
+
         const variety = await models.Variety.findByPk(id);
-        if(!variety){
-            return res.send({ status:false, message: "variety not found" });
+        if (!variety) {
+            return res.send({ status: false, message: "variety not found" });
         }
 
         //delete icon from assets folder
@@ -337,6 +339,6 @@ export const deleteVarieties = async (req, res) => {
         return res.send({ status: true, message: "variety deleted successfully" });
 
     } catch (error) {
-     return res.send({ status: false, message: error.message});   
+        return res.send({ status: false, message: error.message });
     }
 }

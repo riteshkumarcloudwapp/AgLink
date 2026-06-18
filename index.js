@@ -7,7 +7,8 @@ import swaggerUi from "swagger-ui-express";
 
 //routes
 import user from "./src/api/user/index.js";
-import home from "./src/api/admin/home/index.js";
+import adminHome from "./src/api/admin/home/index.js";
+import adminAuth from "./src/api/admin/auth/index.js";
 import seller from "./src/api/seller/index.js";
 import customer from "./src/api/customer/index.js";
 import deliveryBoy from "./src/api/deliveryBoy/index.js";
@@ -36,14 +37,15 @@ app.use(
   swaggerUi.serveFiles(swagger, {}),
   swaggerUi.setup(swagger)
 );
-
+ 
 //db connection
 connectDb;
 console.log(`Database connected to url ${connectDb.url}`)
 
 //routes
 app.use('/user',user);
-app.use('/home',home);
+app.use('/admin/home',adminHome);
+app.use('/admin/auth',adminAuth);
 app.use('/seller',seller);
 app.use('/customer',customer);
 app.use('/delivery-boy',deliveryBoy);
